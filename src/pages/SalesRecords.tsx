@@ -1,0 +1,603 @@
+import { useState } from "react";
+import { format } from "date-fns";
+import { MainLayout } from "@/components/layout/MainLayout";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { SearchIcon, Download } from "lucide-react";
+import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationEllipsis, PaginationPrevious, PaginationNext } from "@/components/ui/pagination";
+import { cn } from "@/lib/utils";
+import { SaleRecordWithDetails, Project, Room, Customer, User } from "@/types";
+import { toast } from "sonner";
+
+// Mock data for demonstration
+const MOCK_PROJECTS = [
+  {
+    id: "1",
+    name: "Luxury Grand Hotel",
+    description: "A 5-star luxury hotel with modern amenities and stunning views.",
+    roomCount: 120,
+    floorCount: 8,
+    imageUrl: "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=2070&auto=format&fit=crop",
+    image3dUrl: "https://images.unsplash.com/photo-1582719508461-905c673771fd?q=80&w=1925&auto=format&fit=crop",
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: "2",
+    name: "Seaside Resort",
+    description: "Beachfront resort with private beach access and water activities.",
+    roomCount: 90,
+    floorCount: 6,
+    imageUrl: "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?q=80&w=2070&auto=format&fit=crop",
+    image3dUrl: "https://images.unsplash.com/photo-1540541338287-41700207dee6?q=80&w=2070&auto=format&fit=crop",
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: "3",
+    name: "Mountain View Lodge",
+    description: "Cozy mountain retreat with hiking trails and outdoor activities.",
+    roomCount: 80,
+    floorCount: 5,
+    imageUrl: "https://images.unsplash.com/photo-1531088009183-5ff5b7c95f91?q=80&w=1974&auto=format&fit=crop",
+    image3dUrl: "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?q=80&w=2070&auto=format&fit=crop",
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: "4",
+    name: "Urban Boutique Hotel",
+    description: "Stylish city center hotel with artistic design and local charm.",
+    roomCount: 60,
+    floorCount: 4,
+    imageUrl: "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?q=80&w=2070&auto=format&fit=crop",
+    image3dUrl: "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?q=80&w=2070&auto=format&fit=crop",
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: "5",
+    name: "Historic Grand Palace",
+    description: "Heritage hotel in a restored palace with classical architecture.",
+    roomCount: 100,
+    floorCount: 7,
+    imageUrl: "https://images.unsplash.com/photo-1529551739587-e242c564f727?q=80&w=2046&auto=format&fit=crop",
+    image3dUrl: "https://images.unsplash.com/photo-1564501049412-61c2a3083791?q=80&w=2064&auto=format&fit=crop",
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: "6",
+    name: "Skyline Towers",
+    description: "Modern high-rise hotel with panoramic city views and rooftop pool.",
+    roomCount: 150,
+    floorCount: 30,
+    imageUrl: "https://images.unsplash.com/photo-1596436889106-be35e843f974?q=80&w=2070&auto=format&fit=crop",
+    image3dUrl: "https://images.unsplash.com/photo-1540555700478-4be289fbecef?q=80&w=2070&auto=format&fit=crop",
+    createdAt: new Date().toISOString(),
+  },
+];
+
+// Mock customers
+const MOCK_CUSTOMERS: Customer[] = [
+  {
+    id: "1",
+    name: "John",
+    surname: "Doe",
+    email: "john.doe@example.com",
+    phone: "+1 (555) 123-4567",
+    associatedProjectId: "1",
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: "2",
+    name: "Jane",
+    surname: "Smith",
+    email: "jane.smith@example.com",
+    phone: "+1 (555) 987-6543",
+    associatedProjectId: "2",
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: "3",
+    name: "Robert",
+    surname: "Johnson",
+    email: "robert.j@example.com",
+    phone: "+1 (555) 456-7890",
+    associatedProjectId: "1",
+    createdAt: new Date().toISOString(),
+  },
+];
+
+// Mock users (salespersons)
+const MOCK_USERS: User[] = [
+  {
+    id: "1",
+    email: "admin@hotel.com",
+    name: "Admin User",
+    role: "admin",
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: "2",
+    email: "manager@hotel.com",
+    name: "Manager User",
+    role: "manager",
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: "3",
+    email: "sales@hotel.com",
+    name: "Sales User",
+    role: "salesperson",
+    createdAt: new Date().toISOString(),
+  },
+];
+
+// Function to generate mock rooms
+const generateMockRooms = (projectId: string, floorCount: number): Room[] => {
+  const rooms: Room[] = [];
+  // Generate rooms for each floor
+  for (let floor = 1; floor <= floorCount; floor++) {
+    // Generate 20 rooms per floor
+    for (let room = 1; room <= 20; room++) {
+      const roomNumber = `${floor}${room.toString().padStart(2, '0')}`;
+      rooms.push({
+        id: `${projectId}-${roomNumber}`,
+        projectId,
+        floor,
+        roomNumber,
+        status: Math.random() > 0.7 ? 'sold' : Math.random() > 0.5 ? 'reserved' : 'available',
+        price: Math.floor(100000 + Math.random() * 500000), // Random price between 100k and 600k
+      });
+    }
+  }
+  return rooms;
+};
+
+// Generate all rooms for all projects
+const getAllMockRooms = (): Room[] => {
+  return MOCK_PROJECTS.flatMap(project => 
+    generateMockRooms(project.id, project.floorCount)
+  );
+};
+
+const MOCK_ROOMS = getAllMockRooms();
+
+// Generate mock sales records
+const generateMockSalesRecords = (): SaleRecordWithDetails[] => {
+  const soldRooms = MOCK_ROOMS.filter(room => room.status === 'sold');
+  return soldRooms.map((room, index) => {
+    const customerId = MOCK_CUSTOMERS[index % MOCK_CUSTOMERS.length].id;
+    const salespersonId = MOCK_USERS[index % MOCK_USERS.length].id;
+    const saleDate = new Date();
+    saleDate.setDate(saleDate.getDate() - Math.floor(Math.random() * 60)); // Random date within the last 60 days
+    
+    return {
+      id: `sale-${index + 1}`,
+      projectId: room.projectId,
+      roomId: room.id,
+      customerId,
+      salespersonId,
+      startDate: saleDate.toISOString(),
+      endDate: saleDate.toISOString(), // For simplicity, using same date
+      amount: room.price,
+      paymentStatus: ['pending', 'completed', 'failed'][Math.floor(Math.random() * 3)] as 'pending' | 'completed' | 'failed',
+      paymentMethod: ['credit_card', 'bank_transfer', 'cash'][Math.floor(Math.random() * 3)] as 'credit_card' | 'bank_transfer' | 'cash',
+      tax: room.price * 0.18, // 18% tax
+      createdAt: saleDate.toISOString(),
+      // Include associated data
+      project: MOCK_PROJECTS.find(p => p.id === room.projectId),
+      room,
+      customer: MOCK_CUSTOMERS.find(c => c.id === customerId),
+      salesperson: MOCK_USERS.find(u => u.id === salespersonId)
+    };
+  });
+};
+
+const MOCK_SALES_RECORDS = generateMockSalesRecords();
+
+export default function SalesRecords() {
+  // Filter state
+  const [filters, setFilters] = useState({
+    projectId: "all", 
+    paymentStatus: "all", 
+    paymentMethod: "all", 
+    search: "",
+  });
+
+  // Handler for filter changes
+  const handleFilterChange = (key: string, value: any) => {
+    setFilters(prev => ({ ...prev, [key]: value }));
+  };
+
+  // Apply filters to sales records
+  const filteredSalesRecords = MOCK_SALES_RECORDS.filter(record => {
+    // Filter by project 
+    if (filters.projectId !== "all" && record.projectId !== filters.projectId) {
+      return false;
+    }
+    
+    // Filter by payment status
+    if (filters.paymentStatus !== "all" && record.paymentStatus !== filters.paymentStatus) {
+      return false;
+    }
+    
+    // Filter by payment method
+    if (filters.paymentMethod !== "all" && record.paymentMethod !== filters.paymentMethod) {
+      return false;
+    }
+
+    // Filter by search (room number, customer name, or project name)
+    if (filters.search) {
+      const searchLower = filters.search.toLowerCase();
+      const roomNumber = record.room?.roomNumber.toLowerCase() || '';
+      const customerName = `${record.customer?.name} ${record.customer?.surname}`.toLowerCase();
+      const projectName = record.project?.name.toLowerCase() || '';
+      
+      if (
+        !roomNumber.includes(searchLower) &&
+        !customerName.includes(searchLower) &&
+        !projectName.includes(searchLower)
+      ) {
+        return false;
+      }
+    }
+    
+    return true;
+  });
+
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const recordsPerPage = 20;
+
+  // Calculate pagination
+  const totalPages = Math.ceil(filteredSalesRecords.length / recordsPerPage);
+  const indexOfLastRecord = currentPage * recordsPerPage;
+  const indexOfFirstRecord = indexOfLastRecord - recordsPerPage;
+  const currentRecords = filteredSalesRecords.slice(indexOfFirstRecord, indexOfLastRecord);
+
+  // Handle page change
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
+  // Generate page numbers for pagination
+  const pageNumbers = [];
+  const maxPagesToShow = 5;
+
+  if (totalPages <= maxPagesToShow) {
+    // If total pages are less than max pages to show, display all pages
+    for (let i = 1; i <= totalPages; i++) {
+      pageNumbers.push(i);
+    }
+  } else {
+    // Always show first page
+    pageNumbers.push(1);
+
+    // Calculate start and end of middle pages
+    let startPage = Math.max(2, currentPage - Math.floor(maxPagesToShow / 2));
+    let endPage = Math.min(totalPages - 1, startPage + maxPagesToShow - 3);
+
+    // Adjust if we're near the end
+    if (endPage - startPage < maxPagesToShow - 3) {
+      startPage = Math.max(2, endPage - (maxPagesToShow - 3));
+    }
+
+    // Add ellipsis if needed
+    if (startPage > 2) {
+      pageNumbers.push('ellipsis-start');
+    }
+
+    // Add middle pages
+    for (let i = startPage; i <= endPage; i++) {
+      pageNumbers.push(i);
+    }
+
+    // Add ellipsis if needed
+    if (endPage < totalPages - 1) {
+      pageNumbers.push('ellipsis-end');
+    }
+
+    // Always show last page
+    pageNumbers.push(totalPages);
+  }
+
+  // Function to download the filtered results as CSV
+  const downloadFilteredResults = () => {
+    // Only proceed if there are records to download
+    if (filteredSalesRecords.length === 0) {
+      toast.error("No records to download.");
+      return;
+    }
+
+    // Define CSV headers
+    const headers = [
+      "Date",
+      "Customer Name",
+      "Project",
+      "Room",
+      "Floor",
+      "Amount",
+      "Payment Status",
+      "Payment Method",
+      "Salesperson"
+    ];
+
+    // Convert records to CSV rows
+    const csvRows = filteredSalesRecords.map(record => {
+      return [
+        format(new Date(record.startDate), "MMM dd, yyyy"),
+        `${record.customer?.name || ""} ${record.customer?.surname || ""}`,
+        record.project?.name || "",
+        record.room?.roomNumber || "",
+        record.room?.floor || "",
+        record.amount.toLocaleString(),
+        record.paymentStatus.charAt(0).toUpperCase() + record.paymentStatus.slice(1),
+        record.paymentMethod === "credit_card" ? "Credit Card" : 
+          record.paymentMethod === "bank_transfer" ? "Bank Transfer" : "Cash",
+        record.salesperson?.name || ""
+      ];
+    });
+
+    // Create CSV content
+    const csvContent = [
+      headers.join(","),
+      ...csvRows.map(row => row.map(cell => `"${cell}"`).join(","))
+    ].join("\n");
+
+    // Create a download link
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `sales-records-${format(new Date(), "yyyy-MM-dd")}.csv`);
+    link.style.visibility = "hidden";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    toast.success("Sales records downloaded successfully!");
+  };
+
+  return (
+    <MainLayout>
+      <div className="container mx-auto px-4 py-6">
+        <h1 className="text-2xl font-bold mb-6">Sales Records</h1>
+        
+        {/* Filters */}
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle>Filtreler</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              {/* Project Filter */}
+              <div>
+                <Label htmlFor="projectFilter">Proje</Label>
+                <Select
+                  value={filters.projectId}
+                  onValueChange={(value) => handleFilterChange("projectId", value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Tüm Projeler" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Tüm Projeler</SelectItem>
+                    {MOCK_PROJECTS.map(project => (
+                      <SelectItem key={project.id} value={project.id}>
+                        {project.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              {/* Payment Status Filter */}
+              <div>
+                <Label htmlFor="paymentStatusFilter">Ödeme Durumu</Label>
+                <Select
+                  value={filters.paymentStatus}
+                  onValueChange={(value) => handleFilterChange("paymentStatus", value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Tüm Ödeme Durumları" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Tüm Ödeme Durumları</SelectItem>
+                    <SelectItem value="pending">Beklemede</SelectItem>
+                    <SelectItem value="completed">Tamamlandı</SelectItem>
+                    <SelectItem value="failed">Başarısız</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              {/* Payment Method Filter */}
+              <div>
+                <Label htmlFor="paymentMethodFilter">Ödeme Tipi</Label>
+                <Select
+                  value={filters.paymentMethod}
+                  onValueChange={(value) => handleFilterChange("paymentMethod", value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Tüm Ödeme Tipleri" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Tüm Ödeme Tipleri</SelectItem>
+                    <SelectItem value="credit_card">Kredi Kartı</SelectItem>
+                    <SelectItem value="bank_transfer">Havale</SelectItem>
+                    <SelectItem value="cash">Nakit</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              {/* Search Filter */}
+              <div>
+                <Label htmlFor="searchFilter">Müşteri Arama</Label>
+                <div className="relative">
+                  <SearchIcon className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="searchFilter"
+                    type="search"
+                    placeholder="Müşteri adı ile arama yapın"
+                    className="pl-8"
+                    value={filters.search}
+                    onChange={(e) => handleFilterChange("search", e.target.value)}
+                  />
+                </div>
+              </div>
+            </div>
+            
+            {/* Reset Filters and Download Button */}
+            <div className="flex flex-wrap gap-3 mt-4">
+              <Button
+                variant="outline"
+                onClick={() => setFilters({
+                  projectId: "all",
+                  paymentStatus: "all",
+                  paymentMethod: "all",
+                  search: "",
+                })}
+              >
+                Filtreleri Sıfırla
+              </Button>
+              
+              <Button 
+                variant="success" 
+                onClick={downloadFilteredResults}
+                disabled={filteredSalesRecords.length === 0}
+              >
+                <Download className="mr-1" />
+                Kayıtları İndir
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+        
+        {/* Sales Records Table */}
+        <Card>
+          <CardContent className="p-0">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Tarih</TableHead>
+                  <TableHead>Bayi</TableHead>
+                  <TableHead>Müşteri</TableHead>
+                  <TableHead>Proje</TableHead>
+                  <TableHead>Blok</TableHead>
+                  <TableHead>Daire</TableHead>
+                  <TableHead>Kat</TableHead>
+                  <TableHead>Tutar</TableHead>
+                  <TableHead>Ödeme Durumu</TableHead>
+                  <TableHead>Ödeme Tipi</TableHead>
+                  <TableHead>Satıcı</TableHead>
+                  <TableHead>Senet No</TableHead>
+                  <TableHead>TC No</TableHead>
+                  <TableHead>Telefon</TableHead>
+                  <TableHead>Email</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {currentRecords.length > 0 ? (
+                  currentRecords.map((record) => (
+                    <TableRow key={record.id}>
+                      <TableCell>{format(new Date(record.startDate), "dd.MM.yyyy")}</TableCell>
+                      <TableCell>Merkez</TableCell>
+                      <TableCell>{record.customer?.name} {record.customer?.surname}</TableCell>
+                      <TableCell>{record.project?.name}</TableCell>
+                      <TableCell>A</TableCell>
+                      <TableCell>{record.room?.roomNumber}</TableCell>
+                      <TableCell>{record.room?.floor}</TableCell>
+                      <TableCell>{record.amount.toLocaleString()} ₺</TableCell>
+                      <TableCell>
+                        <span className={cn(
+                          "px-2 py-1 rounded-full text-xs font-medium",
+                          record.paymentStatus === "completed" && "bg-green-100 text-green-800",
+                          record.paymentStatus === "pending" && "bg-yellow-100 text-yellow-800",
+                          record.paymentStatus === "failed" && "bg-red-100 text-red-800"
+                        )}>
+                          {record.paymentStatus === "completed" ? "Tamamlandı" :
+                           record.paymentStatus === "pending" ? "Beklemede" : "Başarısız"}
+                        </span>
+                      </TableCell>
+                      <TableCell>
+                        <span className={cn(
+                          "px-2 py-1 rounded-full text-xs font-medium",
+                          record.paymentMethod === "credit_card" && "bg-blue-100 text-blue-800",
+                          record.paymentMethod === "bank_transfer" && "bg-purple-100 text-purple-800",
+                          record.paymentMethod === "cash" && "bg-gray-100 text-gray-800"
+                        )}>
+                          {record.paymentMethod === "credit_card" ? "Kredi Kartı" :
+                           record.paymentMethod === "bank_transfer" ? "Havale" : "Nakit"}
+                        </span>
+                      </TableCell>
+                      <TableCell>{record.salesperson?.name}</TableCell>
+                      <TableCell>{record.id.substring(0, 8)}</TableCell>
+                      <TableCell>{Math.floor(Math.random() * 10000000000).toString().padStart(11, '0')}</TableCell>
+                      <TableCell>{record.customer?.phone || "(555) 123-4567"}</TableCell>
+                      <TableCell>{record.customer?.email}</TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={17} className="text-center py-8 text-muted-foreground">
+                      Arama kriterlerinize uygun satış kaydı bulunamadı.
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+        
+        {/* Pagination */}
+        {filteredSalesRecords.length > 0 && (
+          <div className="py-4 px-6 border-t">
+            <div className="flex items-center justify-between">
+              <div className="text-sm text-muted-foreground">
+                {indexOfFirstRecord + 1} ile {Math.min(indexOfLastRecord, filteredSalesRecords.length)} arasında {filteredSalesRecords.length} kayıttan gösteriliyor
+              </div>
+              
+              <Pagination>
+                <PaginationContent>
+                  {currentPage > 1 && (
+                    <PaginationItem>
+                      <PaginationPrevious 
+                        onClick={() => handlePageChange(currentPage - 1)} 
+                        className="cursor-pointer"
+                      />
+                    </PaginationItem>
+                  )}
+                  
+                  {pageNumbers.map((page, index) => (
+                    <PaginationItem key={index}>
+                      {page === 'ellipsis-start' || page === 'ellipsis-end' ? (
+                        <PaginationEllipsis />
+                      ) : (
+                        <PaginationLink
+                          isActive={currentPage === page}
+                          onClick={() => handlePageChange(page as number)}
+                          className="cursor-pointer"
+                        >
+                          {page}
+                        </PaginationLink>
+                      )}
+                    </PaginationItem>
+                  ))}
+                  
+                  {currentPage < totalPages && (
+                    <PaginationItem>
+                      <PaginationNext 
+                        onClick={() => handlePageChange(currentPage + 1)} 
+                        className="cursor-pointer"
+                      />
+                    </PaginationItem>
+                  )}
+                </PaginationContent>
+              </Pagination>
+            </div>
+          </div>
+        )}
+      </div>
+    </MainLayout>
+  );
+}
