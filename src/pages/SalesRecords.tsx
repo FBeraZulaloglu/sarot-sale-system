@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { format } from "date-fns";
+import { useNavigate } from "react-router-dom";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -7,11 +8,28 @@ import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { SearchIcon, Download } from "lucide-react";
+import { SearchIcon, Download, XCircle, Info } from "lucide-react";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationEllipsis, PaginationPrevious, PaginationNext } from "@/components/ui/pagination";
 import { cn } from "@/lib/utils";
 import { SaleRecordWithDetails, Project, Room, Customer, User } from "@/types";
 import { toast } from "sonner";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogClose
+} from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 // Mock data for demonstration
 const MOCK_PROJECTS = [
@@ -172,6 +190,29 @@ const generateMockSalesRecords = (): SaleRecordWithDetails[] => {
     const saleDate = new Date();
     saleDate.setDate(saleDate.getDate() - Math.floor(Math.random() * 60)); // Random date within the last 60 days
     
+    // Randomly mark some sales as canceled (about 20%)
+    const isCanceled = Math.random() < 0.2;
+    let cancellationReason = null;
+    let cancellationDate = null;
+    
+    if (isCanceled) {
+      const cancellationReasons = [
+        "Customer withdrew from the purchase",
+        "Payment issues",
+        "Property condition concerns",
+        "Better offer found elsewhere",
+        "Financial difficulties",
+        "Legal complications"
+      ];
+      cancellationReason = cancellationReasons[Math.floor(Math.random() * cancellationReasons.length)];
+      
+      // Cancellation date is after sale date but before now
+      const cancelDate = new Date(saleDate);
+      cancelDate.setDate(cancelDate.getDate() + Math.floor(Math.random() * 10) + 1); // 1-10 days after sale
+      if (cancelDate > new Date()) cancelDate.setDate(new Date().getDate() - 1); // Ensure it's not in the future
+      cancellationDate = cancelDate.toISOString();
+    }
+    
     return {
       id: `sale-${index + 1}`,
       projectId: room.projectId,
@@ -181,10 +222,13 @@ const generateMockSalesRecords = (): SaleRecordWithDetails[] => {
       startDate: saleDate.toISOString(),
       endDate: saleDate.toISOString(), // For simplicity, using same date
       amount: room.price,
-      paymentStatus: ['pending', 'completed', 'failed'][Math.floor(Math.random() * 3)] as 'pending' | 'completed' | 'failed',
+      paymentStatus: isCanceled ? 'failed' : ['pending', 'completed', 'failed'][Math.floor(Math.random() * 3)] as 'pending' | 'completed' | 'failed',
       paymentMethod: ['credit_card', 'bank_transfer', 'cash'][Math.floor(Math.random() * 3)] as 'credit_card' | 'bank_transfer' | 'cash',
       tax: room.price * 0.18, // 18% tax
       createdAt: saleDate.toISOString(),
+      isCanceled,
+      cancellationReason: cancellationReason,
+      cancellationDate: cancellationDate,
       // Include associated data
       project: MOCK_PROJECTS.find(p => p.id === room.projectId),
       room,
@@ -194,20 +238,59 @@ const generateMockSalesRecords = (): SaleRecordWithDetails[] => {
   });
 };
 
-const MOCK_SALES_RECORDS = generateMockSalesRecords();
+export const MOCK_SALES_RECORDS = generateMockSalesRecords();
 
 export default function SalesRecords() {
+  const navigate = useNavigate();
   // Filter state
   const [filters, setFilters] = useState({
     projectId: "all", 
     paymentStatus: "all", 
     paymentMethod: "all", 
     search: "",
+    showCanceled: "all", // New filter for canceled sales
   });
+
+  // State for sale cancellation
+  const [selectedSale, setSelectedSale] = useState<SaleRecordWithDetails | null>(null);
+  const [cancellationReason, setCancellationReason] = useState("");
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   // Handler for filter changes
   const handleFilterChange = (key: string, value: any) => {
     setFilters(prev => ({ ...prev, [key]: value }));
+  };
+
+  // Function to handle sale cancellation
+  const handleCancelSale = () => {
+    if (!selectedSale || !cancellationReason.trim()) return;
+
+    // In a real app, this would be an API call
+    // For now, we'll update the mock data directly
+    const updatedRecords = MOCK_SALES_RECORDS.map(record => {
+      if (record.id === selectedSale.id) {
+        return {
+          ...record,
+          isCanceled: true,
+          cancellationReason: cancellationReason.trim(),
+          cancellationDate: new Date().toISOString(),
+          paymentStatus: 'failed' as const
+        };
+      }
+      return record;
+    });
+
+    // Update the mock data
+    // In a real app, this would be handled by the API
+    Object.assign(MOCK_SALES_RECORDS, updatedRecords);
+
+    // Reset state
+    setSelectedSale(null);
+    setCancellationReason("");
+    setIsDialogOpen(false);
+
+    // Show success message
+    toast.success("Sale has been canceled successfully");
   };
 
   // Apply filters to sales records
@@ -224,6 +307,13 @@ export default function SalesRecords() {
     
     // Filter by payment method
     if (filters.paymentMethod !== "all" && record.paymentMethod !== filters.paymentMethod) {
+      return false;
+    }
+
+    // Filter by cancellation status
+    if (filters.showCanceled === "canceled" && !record.isCanceled) {
+      return false;
+    } else if (filters.showCanceled === "active" && record.isCanceled) {
       return false;
     }
 
@@ -430,6 +520,24 @@ export default function SalesRecords() {
                 </Select>
               </div>
               
+              {/* Cancellation Status Filter */}
+              <div>
+                <Label htmlFor="cancellationStatusFilter">İptal Durumu</Label>
+                <Select
+                  value={filters.showCanceled}
+                  onValueChange={(value) => handleFilterChange("showCanceled", value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Tüm İptal Durumları" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Tüm İptal Durumları</SelectItem>
+                    <SelectItem value="active">Aktif</SelectItem>
+                    <SelectItem value="canceled">İptal Edilmiş</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
               {/* Search Filter */}
               <div>
                 <Label htmlFor="searchFilter">Müşteri Arama</Label>
@@ -456,6 +564,7 @@ export default function SalesRecords() {
                   paymentStatus: "all",
                   paymentMethod: "all",
                   search: "",
+                  showCanceled: "all"
                 })}
               >
                 Filtreleri Sıfırla
@@ -468,6 +577,14 @@ export default function SalesRecords() {
               >
                 <Download className="mr-1" />
                 Kayıtları İndir
+              </Button>
+
+              <Button
+                variant="destructive"
+                onClick={() => navigate("/cancellable-sales")}
+              >
+                <XCircle className="mr-1" />
+                İptal Edilebilir Satışlar
               </Button>
             </div>
           </CardContent>
@@ -494,6 +611,7 @@ export default function SalesRecords() {
                   <TableHead>TC No</TableHead>
                   <TableHead>Telefon</TableHead>
                   <TableHead>Email</TableHead>
+                  <TableHead>İşlemler</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -535,6 +653,45 @@ export default function SalesRecords() {
                       <TableCell>{Math.floor(Math.random() * 10000000000).toString().padStart(11, '0')}</TableCell>
                       <TableCell>{record.customer?.phone || "(555) 123-4567"}</TableCell>
                       <TableCell>{record.customer?.email}</TableCell>
+                      <TableCell>
+                        {record.isCanceled ? (
+                          <div className="flex items-center gap-2">
+                            <span className="px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                              İptal Edildi
+                            </span>
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button variant="ghost" size="icon" className="h-6 w-6">
+                                    <Info className="h-4 w-4" />
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent className="max-w-xs">
+                                  <div className="space-y-1">
+                                    <p className="font-medium">İptal Bilgileri</p>
+                                    <p className="text-sm">Sebep: {record.cancellationReason}</p>
+                                    {record.cancellationDate && (
+                                      <p className="text-sm">Tarih: {format(new Date(record.cancellationDate), "dd.MM.yyyy")}</p>
+                                    )}
+                                  </div>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                          </div>
+                        ) : (
+                          <Button
+                            variant="destructive"
+                            onClick={() => {
+                              setSelectedSale(record);
+                              setIsDialogOpen(true);
+                            }}
+                            className="flex items-center gap-1"
+                          >
+                            <XCircle className="h-4 w-4" />
+                            İptal Et
+                          </Button>
+                        )}
+                      </TableCell>
                     </TableRow>
                   ))
                 ) : (
@@ -597,6 +754,30 @@ export default function SalesRecords() {
             </div>
           </div>
         )}
+        
+        {/* Cancellation Dialog */}
+        <Dialog open={isDialogOpen} onOpenChange={(open) => setIsDialogOpen(open)}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>İptal Sebebi</DialogTitle>
+            </DialogHeader>
+            <div className="py-4">
+              <Textarea
+                value={cancellationReason}
+                onChange={(e) => setCancellationReason(e.target.value)}
+                placeholder="İptal sebebini giriniz"
+              />
+            </div>
+            <DialogFooter>
+              <Button variant="destructive" onClick={handleCancelSale}>
+                İptal Et
+              </Button>
+              <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+                İptal
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </MainLayout>
   );

@@ -16,7 +16,8 @@ import {
   Menu,
   ChevronRight,
   Store,
-  Building
+  Building,
+  XCircle
 } from "lucide-react";
 
 interface SidebarProps {
@@ -49,9 +50,16 @@ export function Sidebar({ className }: SidebarProps) {
     },
     {
       name: "Sales Records",
-      href: "/sales",
+      href: "/sales-records",
       icon: BarChart3,
-      active: isActive("/sales") || location.pathname.startsWith("/sales/"),
+      active: isActive("/sales-records") || location.pathname.startsWith("/sales/"),
+      roles: ["admin", "manager", "salesperson"],
+    },
+    {
+      name: "Cancellable Sales",
+      href: "/cancellable-sales",
+      icon: XCircle,
+      active: isActive("/cancellable-sales") || location.pathname.startsWith("/cancel-sale/"),
       roles: ["admin", "manager", "salesperson"],
     },
     {

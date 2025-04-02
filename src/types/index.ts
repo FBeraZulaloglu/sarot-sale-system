@@ -71,6 +71,9 @@ export interface SaleRecord {
   paymentMethod: 'credit_card' | 'bank_transfer' | 'cash';
   tax: number;
   createdAt: string;
+  isCanceled?: boolean;
+  cancellationReason?: string;
+  cancellationDate?: string;
 }
 
 // New interface to represent a sale record with associated data
