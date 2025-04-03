@@ -43,25 +43,50 @@ const MOCK_PROJECTS: Project[] = [
   },
   {
     id: "3",
-    name: "Sarot Termal Park Otel",
-    description: "Thermal spa resort with healing waters and comprehensive wellness facilities.",
+    name: "Sarot Grand Resort & Spa",
+    description: "Five-star luxury resort with world-class spa, multiple restaurants, and breathtaking mountain views.",
     roomCount: 200,
     floorCount: 8,
-    imageUrl: "https://images.unsplash.com/photo-1531088009183-5ff5b7c95f91?q=80&w=1974&auto=format&fit=crop",
-    image3dUrl: "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?q=80&w=2070&auto=format&fit=crop",
+    imageUrl: "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?q=80&w=2070&auto=format&fit=crop",
+    image3dUrl: "https://images.unsplash.com/photo-1571896349842-33c89424de2d?q=80&w=1780&auto=format&fit=crop",
     createdAt: new Date().toISOString(),
-    type: "single",
+    type: "hotel",
+    houses: [
+      { id: "3-1", name: "Deluxe Oda", projectId: "3", floorCount: 1, roomCount: 80 },
+      { id: "3-2", name: "Suite Oda", projectId: "3", floorCount: 1, roomCount: 60 },
+      { id: "3-3", name: "Kral Dairesi", projectId: "3", floorCount: 1, roomCount: 40 },
+      { id: "3-4", name: "Termal Oda", projectId: "3", floorCount: 1, roomCount: 20 }
+    ],
+    images: [
+      "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?q=80&w=2070&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1571896349842-33c89424de2d?q=80&w=1780&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?q=80&w=2070&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1564501049412-61c2a3083791?q=80&w=1932&auto=format&fit=crop"
+    ],
+    videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
   },
   {
     id: "4",
-    name: "Sarot Country",
-    description: "Country-style residences with natural surroundings and rustic charm.",
-    roomCount: 150,
-    floorCount: 2,
-    imageUrl: "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?q=80&w=2070&auto=format&fit=crop",
-    image3dUrl: "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?q=80&w=2070&auto=format&fit=crop",
+    name: "Sarot Boutique Hotel & Termal",
+    description: "Intimate boutique hotel offering personalized service, thermal facilities, and elegant accommodations in the heart of nature.",
+    roomCount: 60,
+    floorCount: 5,
+    imageUrl: "https://images.unsplash.com/photo-1564501049412-61c2a3083791?q=80&w=1932&auto=format&fit=crop",
+    image3dUrl: "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?q=80&w=2070&auto=format&fit=crop",
     createdAt: new Date().toISOString(),
-    type: "single",
+    type: "hotel",
+    houses: [
+      { id: "4-1", name: "Standart Oda", projectId: "4", floorCount: 1, roomCount: 30 },
+      { id: "4-2", name: "Deluxe Oda", projectId: "4", floorCount: 1, roomCount: 20 },
+      { id: "4-3", name: "Suite Oda", projectId: "4", floorCount: 1, roomCount: 10 }
+    ],
+    images: [
+      "https://images.unsplash.com/photo-1564501049412-61c2a3083791?q=80&w=1932&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?q=80&w=2070&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?q=80&w=2070&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=2070&auto=format&fit=crop"
+    ],
+    videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
   },
   {
     id: "5",
@@ -208,29 +233,43 @@ export default function Projects() {
                       {/* Status Badge */}
                       <div className="absolute top-2 right-2 flex gap-1">
                         {project.type === "multi" && (
-                          <Badge className="bg-blue-500 hover:bg-blue-600">
+                          <Badge className="bg-blue-500 hover:bg-blue-600 flex items-center">
+                            <Building2 className="h-3 w-3 mr-1" />
                             Çoklu Konut
                           </Badge>
                         )}
-                        {project.name.toLowerCase().includes('otel') && (
-                          <Badge className="bg-amber-500 hover:bg-amber-600">
+                        {project.type === "hotel" && (
+                          <Badge className="bg-amber-500 hover:bg-amber-600 flex items-center">
+                            <Hotel className="h-3 w-3 mr-1" />
                             Otel
                           </Badge>
                         )}
                       </div>
                       
                       {/* Video Button */}
-                      <Button 
-                        variant="secondary" 
-                        size="icon" 
-                        className="absolute bottom-2 right-2 rounded-full bg-white/80 hover:bg-white"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          openYoutubeVideo(project);
-                        }}
-                      >
-                        <Play className="h-4 w-4" />
-                      </Button>
+                      {project.videoUrl && (
+                        <Button 
+                          variant="secondary" 
+                          size="sm" 
+                          className="absolute bottom-2 right-2 rounded-md bg-white/90 hover:bg-white text-red-500 hover:text-red-600 gap-1 shadow-sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            openYoutubeVideo(project);
+                          }}
+                        >
+                          <Play className="h-4 w-4 fill-current" />
+                          Video
+                        </Button>
+                      )}
+                      
+                      {/* Hotel Specific Badge */}
+                      {project.type === "hotel" && (
+                        <div className="absolute bottom-2 left-2 flex gap-1">
+                          <Badge variant="outline" className="bg-white/90 text-xs">
+                            {project.houses?.length || 0} Oda Tipi
+                          </Badge>
+                        </div>
+                      )}
                     </div>
                     
                     <CardHeader className="pb-2">

@@ -45,7 +45,8 @@ export interface Project {
   createdAt: string;
   images?: string[];
   houses?: House[];
-  type: 'single' | 'multi'; // single = one house type, multi = multiple house types
+  videoUrl?: string;
+  type: 'single' | 'multi' | 'hotel'; // single = one house type, multi = multiple house types, hotel = hotel project
 }
 
 export interface Room {
