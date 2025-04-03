@@ -1,6 +1,6 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { MainLayout } from "@/components/layout/MainLayout";
-import { Project } from "@/types";
+import { Project, House } from "@/types";
 import {
   Carousel,
   CarouselContent,
@@ -10,7 +10,8 @@ import {
 } from "@/components/ui/carousel";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, Building2, Home, Calendar, Users2, Map, RotateCcw, Box, Play } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { ChevronLeft, Building2, Home, Calendar, Users2, Map, RotateCcw, Box, Play, Hotel, Building } from "lucide-react";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { useState } from "react";
 import { ProjectModel3DDialog } from "@/components/projects/ProjectModel3DDialog";
@@ -20,74 +21,130 @@ import { YoutubeVideoDialog } from "@/components/projects/YoutubeVideoDialog";
 const MOCK_PROJECTS: Project[] = [
   {
     id: "1",
-    name: "Luxury Grand Hotel",
-    description: "A 5-star luxury hotel with modern amenities and stunning views.",
-    roomCount: 120,
-    floorCount: 8,
+    name: "Burj Al Babas",
+    description: "Iconic castle-style luxury villas with stunning architecture and premium amenities.",
+    roomCount: 732,
+    floorCount: 3,
     imageUrl: "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=2070&auto=format&fit=crop",
     image3dUrl: "https://images.unsplash.com/photo-1582719508461-905c673771fd?q=80&w=1925&auto=format&fit=crop",
     createdAt: new Date().toISOString(),
+    type: "single",
   },
   {
     id: "2",
-    name: "Seaside Resort",
-    description: "Beachfront resort with private beach access and water activities.",
-    roomCount: 90,
-    floorCount: 6,
+    name: "Sarot Palace",
+    description: "Luxurious palace-inspired residences with elegant design and exclusive amenities.",
+    roomCount: 120,
+    floorCount: 4,
     imageUrl: "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?q=80&w=2070&auto=format&fit=crop",
     image3dUrl: "https://images.unsplash.com/photo-1540541338287-41700207dee6?q=80&w=2070&auto=format&fit=crop",
     createdAt: new Date().toISOString(),
+    type: "single",
   },
   {
     id: "3",
-    name: "Mountain View Lodge",
-    description: "Cozy mountain retreat with hiking trails and outdoor activities.",
-    roomCount: 80,
-    floorCount: 5,
+    name: "Sarot Termal Park Otel",
+    description: "Thermal spa resort with healing waters and comprehensive wellness facilities.",
+    roomCount: 200,
+    floorCount: 8,
     imageUrl: "https://images.unsplash.com/photo-1531088009183-5ff5b7c95f91?q=80&w=1974&auto=format&fit=crop",
     image3dUrl: "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?q=80&w=2070&auto=format&fit=crop",
     createdAt: new Date().toISOString(),
+    type: "single",
   },
   {
     id: "4",
-    name: "Urban Boutique Hotel",
-    description: "Stylish city center hotel with artistic design and local charm.",
-    roomCount: 60,
-    floorCount: 4,
+    name: "Sarot Country",
+    description: "Country-style residences with natural surroundings and rustic charm.",
+    roomCount: 150,
+    floorCount: 2,
     imageUrl: "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?q=80&w=2070&auto=format&fit=crop",
     image3dUrl: "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?q=80&w=2070&auto=format&fit=crop",
     createdAt: new Date().toISOString(),
+    type: "single",
   },
   {
     id: "5",
-    name: "Historic Grand Palace",
-    description: "Heritage hotel in a restored palace with classical architecture.",
-    roomCount: 100,
-    floorCount: 7,
+    name: "Sarot Teras Evler",
+    description: "Modern terraced homes with panoramic views and contemporary design.",
+    roomCount: 180,
+    floorCount: 3,
     imageUrl: "https://images.unsplash.com/photo-1529551739587-e242c564f727?q=80&w=2046&auto=format&fit=crop",
     image3dUrl: "https://images.unsplash.com/photo-1564501049412-61c2a3083791?q=80&w=2064&auto=format&fit=crop",
     createdAt: new Date().toISOString(),
+    type: "multi",
+    houses: [
+      { id: "5-1", name: "Fulya", projectId: "5", floorCount: 3, roomCount: 12 },
+      { id: "5-2", name: "Sümbül", projectId: "5", floorCount: 3, roomCount: 12 },
+      { id: "5-3", name: "Sekoya", projectId: "5", floorCount: 3, roomCount: 12 },
+      { id: "5-4", name: "Nergis", projectId: "5", floorCount: 3, roomCount: 12 },
+      { id: "5-5", name: "Frezya", projectId: "5", floorCount: 3, roomCount: 12 },
+      { id: "5-6", name: "Kamelya", projectId: "5", floorCount: 3, roomCount: 12 },
+      { id: "5-7", name: "Sedir", projectId: "5", floorCount: 3, roomCount: 12 },
+      { id: "5-8", name: "Safran", projectId: "5", floorCount: 3, roomCount: 12 },
+      { id: "5-9", name: "Kardelen", projectId: "5", floorCount: 3, roomCount: 12 },
+      { id: "5-10", name: "Laden", projectId: "5", floorCount: 3, roomCount: 12 },
+      { id: "5-11", name: "Karanfil", projectId: "5", floorCount: 3, roomCount: 12 },
+      { id: "5-12", name: "Papatya", projectId: "5", floorCount: 3, roomCount: 12 },
+      { id: "5-13", name: "Sardunya", projectId: "5", floorCount: 3, roomCount: 12 },
+      { id: "5-14", name: "Lilyum", projectId: "5", floorCount: 3, roomCount: 12 },
+      { id: "5-15", name: "Arguvan", projectId: "5", floorCount: 3, roomCount: 12 },
+    ],
   },
   {
     id: "6",
-    name: "Skyline Towers",
-    description: "Modern high-rise hotel with panoramic city views and rooftop pool.",
+    name: "Sarot Bahçe Evleri",
+    description: "Garden homes with lush green spaces and family-friendly environments.",
     roomCount: 150,
-    floorCount: 30,
+    floorCount: 2,
     imageUrl: "https://images.unsplash.com/photo-1596436889106-be35e843f974?q=80&w=2070&auto=format&fit=crop",
     image3dUrl: "https://images.unsplash.com/photo-1540555700478-4be289fbecef?q=80&w=2070&auto=format&fit=crop",
     createdAt: new Date().toISOString(),
+    type: "multi",
+    houses: [
+      { id: "6-1", name: "Anemon", projectId: "6", floorCount: 2, roomCount: 8 },
+      { id: "6-2", name: "Acelya", projectId: "6", floorCount: 2, roomCount: 8 },
+      { id: "6-3", name: "Akasya", projectId: "6", floorCount: 2, roomCount: 8 },
+      { id: "6-4", name: "Ardıç", projectId: "6", floorCount: 2, roomCount: 8 },
+      { id: "6-5", name: "Yonca", projectId: "6", floorCount: 2, roomCount: 8 },
+      { id: "6-6", name: "Yasemin", projectId: "6", floorCount: 2, roomCount: 8 },
+      { id: "6-7", name: "Zambak", projectId: "6", floorCount: 2, roomCount: 8 },
+      { id: "6-8", name: "Zencefil", projectId: "6", floorCount: 2, roomCount: 8 },
+      { id: "6-9", name: "Zerdali", projectId: "6", floorCount: 2, roomCount: 8 },
+      { id: "6-10", name: "Lale", projectId: "6", floorCount: 2, roomCount: 8 },
+      { id: "6-11", name: "Gardenya", projectId: "6", floorCount: 2, roomCount: 8 },
+      { id: "6-12", name: "Gonca", projectId: "6", floorCount: 2, roomCount: 8 },
+      { id: "6-13", name: "Gelincik", projectId: "6", floorCount: 2, roomCount: 8 },
+      { id: "6-14", name: "Zakkum", projectId: "6", floorCount: 2, roomCount: 8 },
+      { id: "6-15", name: "Mimoza", projectId: "6", floorCount: 2, roomCount: 8 },
+      { id: "6-16", name: "Mango", projectId: "6", floorCount: 2, roomCount: 8 },
+      { id: "6-17", name: "Fesleğen", projectId: "6", floorCount: 2, roomCount: 8 },
+      { id: "6-18", name: "Petunya", projectId: "6", floorCount: 2, roomCount: 8 },
+      { id: "6-19", name: "Manolya", projectId: "6", floorCount: 2, roomCount: 8 },
+      { id: "6-20", name: "Nilüfer", projectId: "6", floorCount: 2, roomCount: 8 },
+    ],
   },
 ];
 
 export default function Projects() {
-  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
-  const [is3DDialogOpen, set3DDialogOpen] = useState(false);
+  const navigate = useNavigate();
+  const [activeProject, setActiveProject] = useState<Project | null>(null);
   const [isVideoDialogOpen, setVideoDialogOpen] = useState(false);
   const youtubeVideoId = "MHfT2GAOMV4";
 
+  const handleProjectClick = (project: Project) => {
+    if (project.type === "multi" && project.houses && project.houses.length > 0) {
+      setActiveProject(project);
+    } else {
+      navigate(`/projects/${project.id}`);
+    }
+  };
+
+  const handleHouseClick = (project: Project, house: House) => {
+    navigate(`/projects/${project.id}?house=${house.id}`);
+  };
+
   const openYoutubeVideo = (project: Project) => {
-    setSelectedProject(project);
     setVideoDialogOpen(true);
   };
 
@@ -102,174 +159,296 @@ export default function Projects() {
           </Link>
         </Button>
 
-        <h1 className="text-3xl font-bold tracking-tight">Hotel Projects</h1>
-        <p className="text-muted-foreground">
-          Browse through our collection of hotel development projects in 3D view.
+        <h1 className="text-3xl font-bold tracking-tight">Sarot Projeler</h1>
+        <p className="text-muted-foreground mb-4">
+          Sarot'un prestijli konut ve otel projelerini keşfedin.
         </p>
+        
+        <div className="flex gap-2 mb-4">
+          <Button variant="outline" className="gap-2">
+            <Home className="h-4 w-4" />
+            Tüm Projeler
+          </Button>
+          <Button variant="outline" className="gap-2">
+            <Building2 className="h-4 w-4" />
+            Konut Projeleri
+          </Button>
+          <Button variant="outline" className="gap-2">
+            <Hotel className="h-4 w-4" />
+            Otel Projeleri
+          </Button>
+        </div>
 
         {/* Enhanced 3D Carousel for Projects */}
         <div className="py-6">
           <Carousel className="w-full mx-auto">
             <CarouselContent>
-              {MOCK_PROJECTS.map((project) => (
-                <CarouselItem key={project.id} className="md:basis-1/1 lg:basis-1/1">
-                  <div className="p-1">
-                    <Card className="overflow-hidden">
-                      <div className="relative">
-                        <AspectRatio ratio={16/9} className="bg-muted">
-                          <div className="w-full h-full rounded-t-lg relative group overflow-hidden">
-                            <img
-                              src={project.image3dUrl}
-                              alt={`${project.name} 3D View`}
-                              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                            />
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-70 group-hover:opacity-40 transition-opacity"></div>
-                            <Button 
-                              variant="secondary"
-                              className="absolute top-4 right-4 bg-primary/90 text-primary-foreground hover:bg-primary/80 px-3 py-1 h-auto rounded-full text-xs font-medium flex items-center gap-1"
-                              onClick={(e) => {
-                                e.preventDefault();
-                                openYoutubeVideo(project);
-                              }}
-                            >
-                              <Play className="h-3 w-3" />
-                              Video aç
-                            </Button>
-                          </div>
-                        </AspectRatio>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                {MOCK_PROJECTS.map((project) => (
+                  <Card 
+                    key={project.id} 
+                    className="overflow-hidden cursor-pointer transition-all hover:shadow-md"
+                    onClick={() => handleProjectClick(project)}
+                  >
+                    <div className="relative">
+                      <div className="relative w-full h-48 overflow-hidden group">
+                        <img 
+                          src={project.imageUrl} 
+                          alt={project.name} 
+                          className="w-full h-48 object-cover transition-all duration-300 group-hover:scale-105"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end justify-center pb-4">
+                          <Button variant="secondary" size="sm" className="gap-1">
+                            <Building className="h-4 w-4" />
+                            Projeyi İncele
+                          </Button>
+                        </div>
                       </div>
                       
-                      <CardHeader>
-                        <CardTitle className="text-2xl">{project.name}</CardTitle>
-                        <CardDescription className="line-clamp-2">{project.description}</CardDescription>
-                      </CardHeader>
+                      {/* Status Badge */}
+                      <div className="absolute top-2 right-2 flex gap-1">
+                        {project.type === "multi" && (
+                          <Badge className="bg-blue-500 hover:bg-blue-600">
+                            Çoklu Konut
+                          </Badge>
+                        )}
+                        {project.name.toLowerCase().includes('otel') && (
+                          <Badge className="bg-amber-500 hover:bg-amber-600">
+                            Otel
+                          </Badge>
+                        )}
+                      </div>
                       
-                      <CardContent>
-                        <div className="grid grid-cols-2 gap-4">
-                          <div className="flex items-center gap-2">
-                            <Building2 className="h-4 w-4 text-muted-foreground" />
-                            <div>
-                              <p className="text-sm font-medium">{project.floorCount}</p>
-                              <p className="text-xs text-muted-foreground">Floors</p>
-                            </div>
-                          </div>
-                          
-                          <div className="flex items-center gap-2">
-                            <Home className="h-4 w-4 text-muted-foreground" />
-                            <div>
-                              <p className="text-sm font-medium">{project.roomCount}</p>
-                              <p className="text-xs text-muted-foreground">Rooms</p>
-                            </div>
-                          </div>
-                          
-                          <div className="flex items-center gap-2">
-                            <Users2 className="h-4 w-4 text-muted-foreground" />
-                            <div>
-                              <p className="text-sm font-medium">{Math.floor(project.roomCount * 0.7)}</p>
-                              <p className="text-xs text-muted-foreground">Sold Units</p>
-                            </div>
-                          </div>
-                          
-                          <div className="flex items-center gap-2">
-                            <Calendar className="h-4 w-4 text-muted-foreground" />
-                            <div>
-                              <p className="text-sm font-medium">
-                                {new Date(project.createdAt).toLocaleDateString()}
-                              </p>
-                              <p className="text-xs text-muted-foreground">Launch Date</p>
-                            </div>
+                      {/* Video Button */}
+                      <Button 
+                        variant="secondary" 
+                        size="icon" 
+                        className="absolute bottom-2 right-2 rounded-full bg-white/80 hover:bg-white"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openYoutubeVideo(project);
+                        }}
+                      >
+                        <Play className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    
+                    <CardHeader className="pb-2">
+                      <CardTitle>{project.name}</CardTitle>
+                      <CardDescription className="line-clamp-2">
+                        {project.description}
+                      </CardDescription>
+                    </CardHeader>
+                    
+                    <CardContent className="pb-2">
+                      <div className="grid grid-cols-2 gap-2 mb-2">
+                        <div className="flex items-center gap-1 bg-muted/50 p-1.5 rounded-md">
+                          <Building2 className="h-4 w-4 text-muted-foreground" />
+                          <div className="flex flex-col">
+                            <span className="text-xs text-muted-foreground">Kat</span>
+                            <span className="text-sm font-medium">{project.floorCount}</span>
                           </div>
                         </div>
-                      </CardContent>
+                        
+                        <div className="flex items-center gap-1 bg-muted/50 p-1.5 rounded-md">
+                          <Home className="h-4 w-4 text-muted-foreground" />
+                          <div className="flex flex-col">
+                            <span className="text-xs text-muted-foreground">{project.name.toLowerCase().includes('otel') ? 'Oda' : 'Konut'}</span>
+                            <span className="text-sm font-medium">{project.roomCount}</span>
+                          </div>
+                        </div>
+                      </div>
                       
-                      <CardFooter className="flex justify-between">
-                        <Button variant="outline" asChild>
-                          <Link to={`/projects/${project.id}`} className="flex items-center gap-2">
-                            <Map className="h-4 w-4" />
-                            Floor Plans
-                          </Link>
+                      {/* House Types Preview */}
+                      {project.type === "multi" && project.houses && project.houses.length > 0 && (
+                        <div className="mt-3">
+                          <div className="text-xs text-muted-foreground mb-1">Konut Tipleri:</div>
+                          <div className="flex flex-wrap gap-1">
+                            {project.houses.slice(0, 5).map((house) => (
+                              <Button 
+                                key={house.id} 
+                                variant="outline" 
+                                size="sm" 
+                                className="text-xs"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleHouseClick(project, house);
+                                }}
+                              >
+                                {house.name}
+                              </Button>
+                            ))}
+                            {project.houses.length > 5 && (
+                              <Button 
+                                variant="outline" 
+                                size="sm" 
+                                className="text-xs"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleProjectClick(project);
+                                }}
+                              >
+                                +{project.houses.length - 5} daha
+                              </Button>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </CardContent>
+                    
+                    <CardFooter className="flex flex-col gap-2">
+                      <Button 
+                        variant="default" 
+                        className="w-full"
+                        onClick={() => handleProjectClick(project)}
+                      >
+                        Detayları Gör
+                      </Button>
+                      
+                      <div className="flex gap-2 w-full">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          className="flex-1"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate(`/projects/${project.id}`);
+                          }}
+                        >
+                          <Building className="h-4 w-4 mr-1" />
+                          Proje
                         </Button>
-                        <Button asChild>
-                          <Link to={`/projects/${project.id}`}>View Details</Link>
+                        
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          className="flex-1"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            openYoutubeVideo(project);
+                          }}
+                        >
+                          <Play className="h-4 w-4 mr-1" />
+                          Video
                         </Button>
-                      </CardFooter>
-                    </Card>
-                  </div>
-                </CarouselItem>
-              ))}
+                      </div>
+                    </CardFooter>
+                  </Card>
+                ))}
+              </div>
             </CarouselContent>
             <div className="flex justify-center mt-4 gap-2">
-              <CarouselPrevious className="relative static translate-y-0 left-0" />
-              <CarouselNext className="relative static translate-y-0 right-0" />
+              <CarouselPrevious className="static" />
+              <CarouselNext className="static" />
             </div>
           </Carousel>
         </div>
 
-        {/* Standard Grid View */}
-        <div className="pt-8">
-          <h2 className="text-2xl font-bold mb-6">All Projects</h2>
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {MOCK_PROJECTS.map((project) => (
-              <Card key={project.id} className="overflow-hidden card-hover">
-                <div className="aspect-video w-full overflow-hidden relative group">
-                  <img
-                    src={project.imageUrl}
-                    alt={project.name}
-                    className="h-full w-full object-cover transition-all hover:scale-105"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                    <Button 
-                      variant="secondary"
-                      className="bg-primary/90 text-primary-foreground hover:bg-primary/80"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        openYoutubeVideo(project);
-                      }}
+        {/* Display houses for multi-house projects */}
+        {activeProject && activeProject.type === "multi" && (
+          <div className="mt-8">
+            <Card>
+              <CardHeader>
+                <CardTitle>{activeProject.name} - Konut Tipleri</CardTitle>
+                <CardDescription>
+                  {activeProject.name} projesindeki tüm konut tiplerini inceleyin
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                  {activeProject.houses?.map((house) => (
+                    <Card 
+                      key={house.id} 
+                      className={`overflow-hidden cursor-pointer transition-all hover:shadow-md`}
+                      onClick={() => handleHouseClick(activeProject, house)}
                     >
-                      <Play className="mr-2 h-4 w-4" />
-                      Video aç
-                    </Button>
-                  </div>
+                      <div className="relative">
+                        <div className="h-32 bg-gradient-to-r from-blue-50 to-blue-100 flex items-center justify-center">
+                          <Home className="h-12 w-12 text-blue-500/70" />
+                        </div>
+                        <Badge className="absolute top-2 right-2">
+                          {house.name}
+                        </Badge>
+                      </div>
+                      <CardHeader className="p-4">
+                        <CardTitle className="text-lg flex items-center gap-2">
+                          {house.name}
+                          <Button 
+                            size="icon" 
+                            variant="ghost" 
+                            className="h-6 w-6 ml-auto"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleHouseClick(activeProject, house);
+                            }}
+                          >
+                            <ChevronLeft className="h-4 w-4 rotate-180" />
+                          </Button>
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="p-4 pt-0">
+                        <div className="grid grid-cols-2 gap-2">
+                          <div className="flex items-center gap-1 bg-muted/50 p-1.5 rounded-md">
+                            <Building2 className="h-4 w-4 text-muted-foreground" />
+                            <div className="flex flex-col">
+                              <span className="text-xs text-muted-foreground">Kat</span>
+                              <span className="text-sm font-medium">{house.floorCount}</span>
+                            </div>
+                          </div>
+                          
+                          <div className="flex items-center gap-1 bg-muted/50 p-1.5 rounded-md">
+                            <Home className="h-4 w-4 text-muted-foreground" />
+                            <div className="flex flex-col">
+                              <span className="text-xs text-muted-foreground">Konut</span>
+                              <span className="text-sm font-medium">{house.roomCount}</span>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div className="mt-3 pt-3 border-t">
+                          <Button 
+                            variant="default" 
+                            className="w-full"
+                            onClick={() => handleHouseClick(activeProject, house)}
+                          >
+                            Konutları Gör
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
                 </div>
-                <CardHeader>
-                  <CardTitle>{project.name}</CardTitle>
-                  <CardDescription className="line-clamp-2">
-                    {project.description}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Floors:</span>
-                    <span className="font-medium">{project.floorCount}</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Rooms:</span>
-                    <span className="font-medium">{project.roomCount}</span>
-                  </div>
-                  <Button asChild className="w-full mt-4">
-                    <Link to={`/projects/${project.id}`}>View Details</Link>
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
+              </CardContent>
+              <CardFooter>
+                <Button 
+                  variant="outline" 
+                  onClick={() => {
+                    setActiveProject(null);
+                  }}
+                  className="mr-2"
+                >
+                  Kapat
+                </Button>
+              </CardFooter>
+            </Card>
           </div>
-        </div>
-      </div>
+        )}
 
-      {/* 3D Model Dialog */}
-      <ProjectModel3DDialog 
-        project={selectedProject} 
-        open={is3DDialogOpen} 
-        onOpenChange={set3DDialogOpen} 
-      />
-      
-      {/* YouTube Video Dialog */}
-      <YoutubeVideoDialog
-        project={selectedProject}
-        open={isVideoDialogOpen}
-        onOpenChange={setVideoDialogOpen}
-        videoId={youtubeVideoId}
-      />
+        {/* 3D Model Dialog */}
+        <ProjectModel3DDialog
+          open={false}
+          onOpenChange={() => {}}
+          project={null}
+        />
+
+        {/* YouTube Video Dialog */}
+        <YoutubeVideoDialog
+          open={isVideoDialogOpen}
+          onOpenChange={setVideoDialogOpen}
+          videoId={youtubeVideoId}
+          project={activeProject}
+        />
+      </div>
     </MainLayout>
   );
 }

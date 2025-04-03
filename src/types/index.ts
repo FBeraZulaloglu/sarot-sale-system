@@ -21,6 +21,19 @@ export interface UserRequest {
   createdAt: string;
 }
 
+// House interface for different house types within projects
+export interface House {
+  id: string;
+  name: string;
+  projectId: string;
+  description?: string;
+  imageUrl?: string;
+  floorCount: number;
+  roomCount: number;
+  price?: number;
+  status?: 'available' | 'limited' | 'sold_out';
+}
+
 export interface Project {
   id: string;
   name: string;
@@ -31,15 +44,21 @@ export interface Project {
   image3dUrl: string;
   createdAt: string;
   images?: string[];
+  houses?: House[];
+  type: 'single' | 'multi'; // single = one house type, multi = multiple house types
 }
 
 export interface Room {
   id: string;
   projectId: string;
+  houseId: string; 
   floor: number;
   roomNumber: string;
   status: 'available' | 'reserved' | 'sold';
   price: number;
+  type?: string; // Room type like 1+1, 2+1, etc.
+  size?: number; // Size in square meters
+  balcony?: boolean; // Whether the room has a balcony
 }
 
 export interface RoomReservation {

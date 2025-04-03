@@ -24,147 +24,7 @@ import { Link, useParams, useSearchParams } from "react-router-dom";
 
 // Mock project data
 const MOCK_PROJECTS: Project[] = [
-  {
-    id: "1",
-    name: "Burj Al Babas",
-    description: "Iconic castle-style luxury villas with stunning architecture and premium amenities.",
-    roomCount: 732,
-    floorCount: 3,
-    imageUrl: "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=2070&auto=format&fit=crop",
-    image3dUrl: "https://images.unsplash.com/photo-1582719508461-905c673771fd?q=80&w=1925&auto=format&fit=crop",
-    createdAt: new Date().toISOString(),
-    type: "single",
-    images: [
-      "https://images.unsplash.com/photo-1582719508461-905c673771fd?q=80&w=1925&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=2070&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?q=80&w=2070&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?q=80&w=2070&auto=format&fit=crop"
-    ]
-  },
-  {
-    id: "2",
-    name: "Sarot Palace",
-    description: "Luxurious palace-inspired residences with elegant design and exclusive amenities.",
-    roomCount: 120,
-    floorCount: 4,
-    imageUrl: "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?q=80&w=2070&auto=format&fit=crop",
-    image3dUrl: "https://images.unsplash.com/photo-1540541338287-41700207dee6?q=80&w=2070&auto=format&fit=crop",
-    createdAt: new Date().toISOString(),
-    type: "single",
-    images: [
-      "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?q=80&w=2070&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1540541338287-41700207dee6?q=80&w=2070&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?q=80&w=2070&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=2070&auto=format&fit=crop"
-    ]
-  },
-  {
-    id: "3",
-    name: "Sarot Termal Park Otel",
-    description: "Thermal spa resort with healing waters and comprehensive wellness facilities.",
-    roomCount: 200,
-    floorCount: 8,
-    imageUrl: "https://images.unsplash.com/photo-1531088009183-5ff5b7c95f91?q=80&w=1974&auto=format&fit=crop",
-    image3dUrl: "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?q=80&w=2070&auto=format&fit=crop",
-    createdAt: new Date().toISOString(),
-    type: "single",
-    images: [
-      "https://images.unsplash.com/photo-1531088009183-5ff5b7c95f91?q=80&w=1974&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?q=80&w=2070&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?q=80&w=2070&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=2070&auto=format&fit=crop"
-    ]
-  },
-  {
-    id: "4",
-    name: "Sarot Country",
-    description: "Country-style residences with natural surroundings and rustic charm.",
-    roomCount: 150,
-    floorCount: 2,
-    imageUrl: "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?q=80&w=2070&auto=format&fit=crop",
-    image3dUrl: "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?q=80&w=2070&auto=format&fit=crop",
-    createdAt: new Date().toISOString(),
-    type: "single",
-    images: [
-      "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?q=80&w=2070&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?q=80&w=2070&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=2070&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?q=80&w=2070&auto=format&fit=crop"
-    ]
-  },
-  {
-    id: "5",
-    name: "Sarot Teras Evler",
-    description: "Modern terraced homes with panoramic views and contemporary design.",
-    roomCount: 180,
-    floorCount: 3,
-    imageUrl: "https://images.unsplash.com/photo-1529551739587-e242c564f727?q=80&w=2046&auto=format&fit=crop",
-    image3dUrl: "https://images.unsplash.com/photo-1564501049412-61c2a3083791?q=80&w=2064&auto=format&fit=crop",
-    createdAt: new Date().toISOString(),
-    type: "multi",
-    images: [
-      "https://images.unsplash.com/photo-1529551739587-e242c564f727?q=80&w=2046&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1564501049412-61c2a3083791?q=80&w=2064&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?q=80&w=2070&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=2070&auto=format&fit=crop"
-    ],
-    houses: [
-      { id: "5-1", name: "Fulya", projectId: "5", floorCount: 3, roomCount: 12 },
-      { id: "5-2", name: "Sümbül", projectId: "5", floorCount: 3, roomCount: 12 },
-      { id: "5-3", name: "Sekoya", projectId: "5", floorCount: 3, roomCount: 12 },
-      { id: "5-4", name: "Nergis", projectId: "5", floorCount: 3, roomCount: 12 },
-      { id: "5-5", name: "Frezya", projectId: "5", floorCount: 3, roomCount: 12 },
-      { id: "5-6", name: "Kamelya", projectId: "5", floorCount: 3, roomCount: 12 },
-      { id: "5-7", name: "Sedir", projectId: "5", floorCount: 3, roomCount: 12 },
-      { id: "5-8", name: "Safran", projectId: "5", floorCount: 3, roomCount: 12 },
-      { id: "5-9", name: "Kardelen", projectId: "5", floorCount: 3, roomCount: 12 },
-      { id: "5-10", name: "Laden", projectId: "5", floorCount: 3, roomCount: 12 },
-      { id: "5-11", name: "Karanfil", projectId: "5", floorCount: 3, roomCount: 12 },
-      { id: "5-12", name: "Papatya", projectId: "5", floorCount: 3, roomCount: 12 },
-      { id: "5-13", name: "Sardunya", projectId: "5", floorCount: 3, roomCount: 12 },
-      { id: "5-14", name: "Lilyum", projectId: "5", floorCount: 3, roomCount: 12 },
-      { id: "5-15", name: "Arguvan", projectId: "5", floorCount: 3, roomCount: 12 },
-    ]
-  },
-  {
-    id: "6",
-    name: "Sarot Bahçe Evleri",
-    description: "Garden homes with lush green spaces and family-friendly environments.",
-    roomCount: 150,
-    floorCount: 2,
-    imageUrl: "https://images.unsplash.com/photo-1596436889106-be35e843f974?q=80&w=2070&auto=format&fit=crop",
-    image3dUrl: "https://images.unsplash.com/photo-1540555700478-4be289fbecef?q=80&w=2070&auto=format&fit=crop",
-    createdAt: new Date().toISOString(),
-    type: "multi",
-    images: [
-      "https://images.unsplash.com/photo-1596436889106-be35e843f974?q=80&w=2070&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1540555700478-4be289fbecef?q=80&w=2070&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?q=80&w=2070&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=2070&auto=format&fit=crop"
-    ],
-    houses: [
-      { id: "6-1", name: "Anemon", projectId: "6", floorCount: 2, roomCount: 8 },
-      { id: "6-2", name: "Acelya", projectId: "6", floorCount: 2, roomCount: 8 },
-      { id: "6-3", name: "Orkide", projectId: "6", floorCount: 2, roomCount: 8 },
-      { id: "6-4", name: "Menekse", projectId: "6", floorCount: 2, roomCount: 8 },
-      { id: "6-5", name: "Gül", projectId: "6", floorCount: 2, roomCount: 8 },
-      { id: "6-6", name: "Lale", projectId: "6", floorCount: 2, roomCount: 8 },
-      { id: "6-7", name: "Zambak", projectId: "6", floorCount: 2, roomCount: 8 },
-      { id: "6-8", name: "Yasemin", projectId: "6", floorCount: 2, roomCount: 8 },
-      { id: "6-9", name: "Lavanta", projectId: "6", floorCount: 2, roomCount: 8 },
-      { id: "6-10", name: "Akasya", projectId: "6", floorCount: 2, roomCount: 8 },
-      { id: "6-11", name: "Begonvil", projectId: "6", floorCount: 2, roomCount: 8 },
-      { id: "6-12", name: "Hanmeli", projectId: "6", floorCount: 2, roomCount: 8 },
-      { id: "6-13", name: "Kaktus", projectId: "6", floorCount: 2, roomCount: 8 },
-      { id: "6-14", name: "Narçiçeği", projectId: "6", floorCount: 2, roomCount: 8 },
-      { id: "6-15", name: "Mimoza", projectId: "6", floorCount: 2, roomCount: 8 },
-      { id: "6-16", name: "Mango", projectId: "6", floorCount: 2, roomCount: 8 },
-      { id: "6-17", name: "Fesleğen", projectId: "6", floorCount: 2, roomCount: 8 },
-      { id: "6-18", name: "Petunya", projectId: "6", floorCount: 2, roomCount: 8 },
-      { id: "6-19", name: "Manolya", projectId: "6", floorCount: 2, roomCount: 8 },
-      { id: "6-20", name: "Nilüfer", projectId: "6", floorCount: 2, roomCount: 8 },
-    ]
-  },
+  // ... existing mock projects
 ];
 
 // Helper function to generate mock rooms for a project
@@ -441,98 +301,26 @@ export default function ProjectDetails() {
                   <CardTitle>Konut Tipleri</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="mb-4">
-                    <div className="flex items-center justify-between mb-3">
-                      <h3 className="text-sm font-medium text-muted-foreground">Seçili Konut Tipi: <span className="font-bold text-primary">{selectedHouse ? selectedHouse.name : 'Tümü'}</span></h3>
-                      <Badge variant="outline" className="px-2">
-                        {project.houses.length} Konut Tipi
-                      </Badge>
-                    </div>
-                    
-                    <div className="relative mb-4">
-                      <div className="absolute inset-0 flex items-center">
-                        <div className="w-full border-t border-muted"></div>
-                      </div>
-                      <div className="relative flex justify-center">
-                        <span className="bg-card px-2 text-xs text-muted-foreground">Konut Tipleri</span>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
                     {project.houses.map((house) => (
-                      <div 
+                      <Button 
                         key={house.id} 
-                        className={`relative rounded-lg border overflow-hidden transition-all cursor-pointer p-0 ${
-                          selectedHouse?.id === house.id 
-                            ? 'border-primary shadow-md scale-102 bg-primary/5' 
-                            : 'border-muted hover:border-primary/50 hover:shadow-sm'
-                        }`}
+                        variant={selectedHouse?.id === house.id ? "default" : "outline"}
+                        className="w-full"
                         onClick={() => setSelectedHouse(house)}
                       >
-                        <div className="p-3">
-                          <div className="flex items-start mb-2">
-                            <div className={`p-2 rounded-md ${selectedHouse?.id === house.id ? 'bg-primary/10' : 'bg-muted'}`}>
-                              <Home className={`h-5 w-5 ${selectedHouse?.id === house.id ? 'text-primary' : 'text-muted-foreground'}`} />
-                            </div>
-                            <div className="ml-2 flex-1">
-                              <div className="font-medium text-base">{house.name}</div>
-                              <div className="text-xs text-muted-foreground">Konut Tipi</div>
-                            </div>
-                            {selectedHouse?.id === house.id && (
-                              <Badge className="bg-primary">Seçili</Badge>
-                            )}
-                          </div>
-                          
-                          <div className="grid grid-cols-2 gap-2 mt-3">
-                            <div className="flex flex-col items-center justify-center p-2 bg-muted/50 rounded-md">
-                              <span className="text-sm font-medium">{house.roomCount}</span>
-                              <span className="text-xs text-muted-foreground">Konut</span>
-                            </div>
-                            <div className="flex flex-col items-center justify-center p-2 bg-muted/50 rounded-md">
-                              <span className="text-sm font-medium">{house.floorCount}</span>
-                              <span className="text-xs text-muted-foreground">Kat</span>
-                            </div>
-                          </div>
-                        </div>
-                        
-                        <div className={`py-2 px-3 text-center text-sm ${
-                          selectedHouse?.id === house.id 
-                            ? 'bg-primary text-primary-foreground' 
-                            : 'bg-muted/50 text-muted-foreground'
-                        }`}>
-                          <span className="font-medium">Detayları Gör</span>
-                        </div>
-                      </div>
+                        {house.name}
+                      </Button>
                     ))}
-                    
                     {selectedHouse && (
-                      <div 
-                        className="relative rounded-lg border border-dashed border-muted hover:border-muted-foreground transition-all cursor-pointer p-0"
+                      <Button 
+                        variant="ghost" 
+                        className="w-full"
                         onClick={() => setSelectedHouse(null)}
                       >
-                        <div className="p-3 flex flex-col items-center justify-center h-full">
-                          <div className="p-2 rounded-full bg-muted mb-2">
-                            <Building2 className="h-5 w-5 text-muted-foreground" />
-                          </div>
-                          <div className="text-center">
-                            <div className="font-medium">Tüm Konutlar</div>
-                            <div className="text-xs text-muted-foreground mt-1">Toplam {project.roomCount} konut</div>
-                          </div>
-                        </div>
-                      </div>
+                        Tümünü Göster
+                      </Button>
                     )}
-                  </div>
-                  
-                  <div className="mt-4 pt-4 border-t flex justify-between items-center">
-                    <div className="text-xs text-muted-foreground">
-                      {selectedHouse ? 
-                        `${selectedHouse.name} - ${selectedHouse.roomCount} konut, ${selectedHouse.floorCount} kat` : 
-                        `Tüm konut tipleri - Toplam ${project.roomCount} konut`}
-                    </div>
-                    <Button variant="link" size="sm" className="text-xs p-0 h-auto" asChild>
-                      <Link to="/projects">Diğer Projeler</Link>
-                    </Button>
                   </div>
                 </CardContent>
               </Card>
@@ -544,7 +332,7 @@ export default function ProjectDetails() {
         <div className="mt-8">
           <Card>
             <CardHeader>
-              <CardTitle>{selectedHouse ? `${selectedHouse.name} Oda Arama` : `${project.name} Konut Arama`}</CardTitle>
+              <CardTitle>Konut Arama</CardTitle>
             </CardHeader>
             <CardContent>
               <DateRangeFilter onFilter={handleDateRangeFilter} />
