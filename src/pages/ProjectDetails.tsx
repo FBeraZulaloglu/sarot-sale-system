@@ -43,19 +43,29 @@ const MOCK_PROJECTS: Project[] = [
   },
   {
     id: "2",
-    name: "Sarot Palace",
+    name: "SAROT TERMAL PALACE",
     description: "Luxurious palace-inspired residences with elegant design and exclusive amenities.",
-    roomCount: 120,
-    floorCount: 4,
+    roomCount: 388, // Total: 8 floors × (8 × 3+1 + 40 × 1+1) per floor + 4 × 4+1 + 8 × 3+1 + 28 × 2+1 on 7th floor
+    floorCount: 8, // 0-7 floors (8 floors total)
     imageUrl: "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?q=80&w=2070&auto=format&fit=crop",
     image3dUrl: "https://images.unsplash.com/photo-1540541338287-41700207dee6?q=80&w=2070&auto=format&fit=crop",
     createdAt: new Date().toISOString(),
-    type: "single",
+    type: "multi", // Changed to multi to support different floor layouts
     images: [
       "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?q=80&w=2070&auto=format&fit=crop",
       "https://images.unsplash.com/photo-1540541338287-41700207dee6?q=80&w=2070&auto=format&fit=crop",
       "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?q=80&w=2070&auto=format&fit=crop",
       "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=2070&auto=format&fit=crop"
+    ],
+    houses: [
+      { id: "2-0", name: "0. Kat (Zemin)", projectId: "2", floorCount: 1, roomCount: 48 }, // 8 × 3+1 + 40 × 1+1
+      { id: "2-1", name: "1. Kat", projectId: "2", floorCount: 1, roomCount: 48 }, // 8 × 3+1 + 40 × 1+1
+      { id: "2-2", name: "2. Kat", projectId: "2", floorCount: 1, roomCount: 48 }, // 8 × 3+1 + 40 × 1+1
+      { id: "2-3", name: "3. Kat", projectId: "2", floorCount: 1, roomCount: 48 }, // 8 × 3+1 + 40 × 1+1
+      { id: "2-4", name: "4. Kat", projectId: "2", floorCount: 1, roomCount: 48 }, // 8 × 3+1 + 40 × 1+1
+      { id: "2-5", name: "5. Kat", projectId: "2", floorCount: 1, roomCount: 48 }, // 8 × 3+1 + 40 × 1+1
+      { id: "2-6", name: "6. Kat", projectId: "2", floorCount: 1, roomCount: 48 }, // 8 × 3+1 + 40 × 1+1
+      { id: "2-7", name: "7. Kat (Çatı)", projectId: "2", floorCount: 1, roomCount: 40 }  // 4 × 4+1 + 8 × 3+1 + 28 × 2+1
     ]
   },
   {
@@ -170,35 +180,100 @@ const MOCK_PROJECTS: Project[] = [
 // Helper function to generate mock rooms for a project
 function generateMockRooms(projectId: string, floorCount: number, houseId?: string): Room[] {
   const rooms: Room[] = [];
-  const roomsPerFloor = 8;
+  
+  // Check if this is the SAROT TERMAL PALACE project (id: "2")
+  const isThermalPalace = projectId === "2" || (houseId && houseId.startsWith("2-"));
   
   for (let floor = 1; floor <= floorCount; floor++) {
-    for (let i = 1; i <= roomsPerFloor; i++) {
-      const roomNumber = `${floor}${i.toString().padStart(2, '0')}`;
-      const id = `${projectId}-${roomNumber}`;
-      const price = 100000 + (floor * 10000) + (Math.random() * 50000);
-      
-      // Determine status based on some logic
-      let status: 'available' | 'reserved' | 'sold' = 'available';
-      const rand = Math.random();
-      if (rand < 0.2) {
-        status = 'reserved';
-      } else if (rand < 0.5) {
-        status = 'sold';
+    // For SAROT TERMAL PALACE, use the specific room configuration
+    if (isThermalPalace) {
+      // Generate 40 1+1 rooms
+      for (let i = 1; i <= 40; i++) {
+        const roomNumber = `${floor}${i.toString().padStart(2, '0')}`;
+        const id = `${projectId}-${roomNumber}`;
+        const price = 100000 + (floor * 10000) + (Math.random() * 50000);
+        
+        // Determine status based on some logic
+        let status: 'available' | 'reserved' | 'sold' = 'available';
+        const rand = Math.random();
+        if (rand < 0.2) {
+          status = 'reserved';
+        } else if (rand < 0.5) {
+          status = 'sold';
+        }
+        
+        rooms.push({
+          id,
+          projectId,
+          houseId: houseId || projectId,
+          floor,
+          roomNumber,
+          price,
+          status,
+          type: '1+1', // All these rooms are 1+1
+          size: Math.floor(50 + (Math.random() * 20)), // Smaller size for 1+1
+          balcony: Math.random() > 0.3,
+        });
       }
       
-      rooms.push({
-        id,
-        projectId,
-        houseId: houseId || projectId, // Use houseId if provided
-        floor,
-        roomNumber,
-        price,
-        status,
-        type: Math.random() > 0.7 ? '2+1' : '1+1',
-        size: Math.floor(50 + (Math.random() * 50)),
-        balcony: Math.random() > 0.3,
-      });
+      // Generate 8 3+1 rooms
+      for (let i = 41; i <= 48; i++) {
+        const roomNumber = `${floor}${i.toString().padStart(2, '0')}`;
+        const id = `${projectId}-${roomNumber}`;
+        const price = 200000 + (floor * 15000) + (Math.random() * 70000); // Higher price for larger rooms
+        
+        // Determine status based on some logic
+        let status: 'available' | 'reserved' | 'sold' = 'available';
+        const rand = Math.random();
+        if (rand < 0.2) {
+          status = 'reserved';
+        } else if (rand < 0.5) {
+          status = 'sold';
+        }
+        
+        rooms.push({
+          id,
+          projectId,
+          houseId: houseId || projectId,
+          floor,
+          roomNumber,
+          price,
+          status,
+          type: '3+1', // All these rooms are 3+1
+          size: Math.floor(100 + (Math.random() * 40)), // Larger size for 3+1
+          balcony: true, // All 3+1 have balconies
+        });
+      }
+    } else {
+      // For other projects, use the original logic with 8 rooms per floor
+      const roomsPerFloor = 8;
+      for (let i = 1; i <= roomsPerFloor; i++) {
+        const roomNumber = `${floor}${i.toString().padStart(2, '0')}`;
+        const id = `${projectId}-${roomNumber}`;
+        const price = 100000 + (floor * 10000) + (Math.random() * 50000);
+        
+        // Determine status based on some logic
+        let status: 'available' | 'reserved' | 'sold' = 'available';
+        const rand = Math.random();
+        if (rand < 0.2) {
+          status = 'reserved';
+        } else if (rand < 0.5) {
+          status = 'sold';
+        }
+        
+        rooms.push({
+          id,
+          projectId,
+          houseId: houseId || projectId, // Use houseId if provided
+          floor,
+          roomNumber,
+          price,
+          status,
+          type: Math.random() > 0.7 ? '2+1' : '1+1',
+          size: Math.floor(50 + (Math.random() * 50)),
+          balcony: Math.random() > 0.3,
+        });
+      }
     }
   }
   
@@ -222,6 +297,7 @@ export default function ProjectDetails() {
   const [activeTab, setActiveTab] = useState("overview");
   const [startDateFilter, setStartDateFilter] = useState<Date | undefined>(undefined);
   const [endDateFilter, setEndDateFilter] = useState<Date | undefined>(undefined);
+  const [seasonFilter, setSeasonFilter] = useState<string | undefined>(undefined);
   const [isVideoDialogOpen, setVideoDialogOpen] = useState(false);
   const [selectedFloor, setSelectedFloor] = useState<number>(1);
   const [selectedHouse, setSelectedHouse] = useState<House | null>(null);
@@ -327,9 +403,69 @@ export default function ProjectDetails() {
     return acc;
   }, {} as Record<number, number>);
 
-  const handleDateRangeFilter = (startDate: Date | undefined, endDate: Date | undefined) => {
+  const handleDateRangeFilter = (
+    startDate: Date | undefined, 
+    endDate: Date | undefined, 
+    season?: string,
+    roomCount?: string,
+    roomType?: string,
+    weekNumber?: string
+  ) => {
     setStartDateFilter(startDate);
     setEndDateFilter(endDate);
+    setSeasonFilter(season);
+    
+    // Apply filters to the rooms
+    const filteredRooms = MOCK_ROOMS.filter(room => {
+      // Filter by house if a house is selected
+      if (selectedHouse && room.houseId !== selectedHouse.id) {
+        return false;
+      }
+      
+      // Filter by date range if specified
+      if (startDate && endDate) {
+        // In a real app, we would check if the room is available during this date range
+        // For now, we'll just include all rooms when a date range is specified
+      }
+      
+      // Filter by season if specified
+      if (season) {
+        // In a real app, we would check if the room is available during this season
+        // For now, we'll just include all rooms when a season is specified
+      }
+      
+      // Filter by specific week if season and week are specified
+      if (season && weekNumber) {
+        // In a real app, we would check if the room is available during this specific week
+        // For now, we'll just include all rooms when a week is specified
+        // This would typically involve checking availability for specific dates
+        // corresponding to the selected week
+      }
+      
+      // Filter by room count if specified
+      if (roomCount) {
+        // In a real app, we would check the room's actual count/size
+        // For now, we'll just filter based on the room type which might include this info
+        if (room.type && !room.type.includes(roomCount)) {
+          return false;
+        }
+      }
+      
+      // Filter by room type if specified
+      if (roomType) {
+        // Check if the room matches the selected type
+        if (roomType === 'standart' && room.type !== 'Standart') return false;
+        if (roomType === 'premium' && room.type !== 'Premium') return false;
+        if (roomType === 'engelli' && room.type !== 'Engelli') return false;
+        if (roomType === 'king-suit' && room.type !== 'King Suit') return false;
+        if (roomType === 'suit' && room.type !== 'Suit') return false;
+      }
+      
+      return true;
+    });
+    
+    console.log(`Filters applied: ${startDate ? format(startDate, 'PP') : 'No start date'}, ${endDate ? format(endDate, 'PP') : 'No end date'}, Season: ${season || 'None'}, Week: ${weekNumber || 'None'}, Room Count: ${roomCount || 'Any'}, Room Type: ${roomType || 'Any'}`);
+    console.log(`Filtered rooms: ${filteredRooms.length}`);
   };
 
   return (
@@ -382,7 +518,7 @@ export default function ProjectDetails() {
                 )}
                 <p className="text-muted-foreground mb-4">{project.description}</p>
                 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-4">
                   <div className="flex items-center gap-2">
                     <Building2 className="h-4 w-4 text-muted-foreground" />
                     <div>
@@ -400,22 +536,64 @@ export default function ProjectDetails() {
                   </div>
                   
                   <div className="flex items-center gap-2">
-                    <Users className="h-4 w-4 text-muted-foreground" />
-                    <div>
-                      <p className="text-sm font-medium">
-                        {Math.floor((selectedHouse?.roomCount || project.roomCount) * 0.7)}
-                      </p>
-                      <p className="text-xs text-muted-foreground">Satılan Konutlar</p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center gap-2">
                     <Calendar className="h-4 w-4 text-muted-foreground" />
                     <div>
                       <p className="text-sm font-medium">
                         {new Date(project.createdAt).toLocaleDateString()}
                       </p>
                       <p className="text-xs text-muted-foreground">Başlangıç Tarihi</p>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Project Features Overview */}
+                <div className="grid grid-cols-3 gap-3 mb-4">
+                  <div className="p-2 bg-indigo-50 rounded-md border border-indigo-100">
+                    <div className="text-xs text-indigo-700 flex items-center gap-1 mb-1">
+                      <Building2 className="h-3.5 w-3.5" />
+                      <span>Property Details</span>
+                    </div>
+                    <div className="text-sm font-medium text-indigo-700">
+                      <div className="flex justify-between">
+                        <span>Total Units:</span>
+                        <span>{roomCounts.total}</span>
+                      </div>
+                      <div className="flex justify-between mt-1">
+                        <span>Floors:</span>
+                        <span>{selectedHouse ? selectedHouse.floorCount : project.floorCount}</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="p-2 bg-rose-50 rounded-md border border-rose-100">
+                    <div className="text-xs text-rose-700 flex items-center gap-1 mb-1">
+                      <Home className="h-3.5 w-3.5" />
+                      <span>Amenities</span>
+                    </div>
+                    <div className="text-sm font-medium text-rose-700">
+                      <div className="flex items-center gap-1">
+                        <span>• Thermal Spa</span>
+                      </div>
+                      <div className="flex items-center gap-1 mt-1">
+                        <span>• 24/7 Security</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="p-2 bg-emerald-50 rounded-md border border-emerald-100">
+                    <div className="text-xs text-emerald-700 flex items-center gap-1 mb-1">
+                      <Calendar className="h-3.5 w-3.5" />
+                      <span>Project Timeline</span>
+                    </div>
+                    <div className="text-sm font-medium text-emerald-700">
+                      <div className="flex justify-between">
+                        <span>Start Date:</span>
+                        <span>Jan 2023</span>
+                      </div>
+                      <div className="flex justify-between mt-1">
+                        <span>Completion:</span>
+                        <span>Dec 2025</span>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -433,111 +611,7 @@ export default function ProjectDetails() {
             </div>
           </div>
 
-          {/* House Selector for Multi-House Projects */}
-          {project.type === "multi" && project.houses && project.houses.length > 0 && (
-            <div className="mb-8">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Konut Tipleri</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="mb-4">
-                    <div className="flex items-center justify-between mb-3">
-                      <h3 className="text-sm font-medium text-muted-foreground">Seçili Konut Tipi: <span className="font-bold text-primary">{selectedHouse ? selectedHouse.name : 'Tümü'}</span></h3>
-                      <Badge variant="outline" className="px-2">
-                        {project.houses.length} Konut Tipi
-                      </Badge>
-                    </div>
-                    
-                    <div className="relative mb-4">
-                      <div className="absolute inset-0 flex items-center">
-                        <div className="w-full border-t border-muted"></div>
-                      </div>
-                      <div className="relative flex justify-center">
-                        <span className="bg-card px-2 text-xs text-muted-foreground">Konut Tipleri</span>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                    {project.houses.map((house) => (
-                      <div 
-                        key={house.id} 
-                        className={`relative rounded-lg border overflow-hidden transition-all cursor-pointer p-0 ${
-                          selectedHouse?.id === house.id 
-                            ? 'border-primary shadow-md scale-102 bg-primary/5' 
-                            : 'border-muted hover:border-primary/50 hover:shadow-sm'
-                        }`}
-                        onClick={() => setSelectedHouse(house)}
-                      >
-                        <div className="p-3">
-                          <div className="flex items-start mb-2">
-                            <div className={`p-2 rounded-md ${selectedHouse?.id === house.id ? 'bg-primary/10' : 'bg-muted'}`}>
-                              <Home className={`h-5 w-5 ${selectedHouse?.id === house.id ? 'text-primary' : 'text-muted-foreground'}`} />
-                            </div>
-                            <div className="ml-2 flex-1">
-                              <div className="font-medium text-base">{house.name}</div>
-                              <div className="text-xs text-muted-foreground">Konut Tipi</div>
-                            </div>
-                            {selectedHouse?.id === house.id && (
-                              <Badge className="bg-primary">Seçili</Badge>
-                            )}
-                          </div>
-                          
-                          <div className="grid grid-cols-2 gap-2 mt-3">
-                            <div className="flex flex-col items-center justify-center p-2 bg-muted/50 rounded-md">
-                              <span className="text-sm font-medium">{house.roomCount}</span>
-                              <span className="text-xs text-muted-foreground">Konut</span>
-                            </div>
-                            <div className="flex flex-col items-center justify-center p-2 bg-muted/50 rounded-md">
-                              <span className="text-sm font-medium">{house.floorCount}</span>
-                              <span className="text-xs text-muted-foreground">Kat</span>
-                            </div>
-                          </div>
-                        </div>
-                        
-                        <div className={`py-2 px-3 text-center text-sm ${
-                          selectedHouse?.id === house.id 
-                            ? 'bg-primary text-primary-foreground' 
-                            : 'bg-muted/50 text-muted-foreground'
-                        }`}>
-                          <span className="font-medium">Detayları Gör</span>
-                        </div>
-                      </div>
-                    ))}
-                    
-                    {selectedHouse && (
-                      <div 
-                        className="relative rounded-lg border border-dashed border-muted hover:border-muted-foreground transition-all cursor-pointer p-0"
-                        onClick={() => setSelectedHouse(null)}
-                      >
-                        <div className="p-3 flex flex-col items-center justify-center h-full">
-                          <div className="p-2 rounded-full bg-muted mb-2">
-                            <Building2 className="h-5 w-5 text-muted-foreground" />
-                          </div>
-                          <div className="text-center">
-                            <div className="font-medium">Tüm Konutlar</div>
-                            <div className="text-xs text-muted-foreground mt-1">Toplam {project.roomCount} konut</div>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                  
-                  <div className="mt-4 pt-4 border-t flex justify-between items-center">
-                    <div className="text-xs text-muted-foreground">
-                      {selectedHouse ? 
-                        `${selectedHouse.name} - ${selectedHouse.roomCount} konut, ${selectedHouse.floorCount} kat` : 
-                        `Tüm konut tipleri - Toplam ${project.roomCount} konut`}
-                    </div>
-                    <Button variant="link" size="sm" className="text-xs p-0 h-auto" asChild>
-                      <Link to="/projects">Diğer Projeler</Link>
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          )}
+          {/* House selector section removed - this project only has 1+1 rooms */}
         </div>
         
         {/* Filter System */}
@@ -560,7 +634,7 @@ export default function ProjectDetails() {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Layers className="h-5 w-5" />
-                    Floor {selectedFloor} Information
+                    All Floors Information
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -570,28 +644,28 @@ export default function ProjectDetails() {
                         <Hotel className="h-4 w-4" />
                         Total Rooms
                       </div>
-                      <div className="text-2xl font-bold">{roomStatusByFloor[selectedFloor]?.total || 0}</div>
+                      <div className="text-2xl font-bold">{roomCounts.total}</div>
                     </div>
                     <div className="p-3 bg-green-50 rounded-md">
                       <div className="text-sm text-green-700 flex items-center gap-1">
                         <BedDouble className="h-4 w-4" />
                         Available
                       </div>
-                      <div className="text-2xl font-bold text-green-700">{roomStatusByFloor[selectedFloor]?.available || 0}</div>
+                      <div className="text-2xl font-bold text-green-700">{roomCounts.available}</div>
                     </div>
                     <div className="p-3 bg-amber-50 rounded-md">
                       <div className="text-sm text-amber-700 flex items-center gap-1">
                         <Calendar className="h-4 w-4" />
                         Reserved
                       </div>
-                      <div className="text-2xl font-bold text-amber-700">{roomStatusByFloor[selectedFloor]?.reserved || 0}</div>
+                      <div className="text-2xl font-bold text-amber-700">{roomCounts.reserved}</div>
                     </div>
                     <div className="p-3 bg-blue-50 rounded-md">
                       <div className="text-sm text-blue-700 flex items-center gap-1">
                         <DollarSign className="h-4 w-4" />
                         Sold
                       </div>
-                      <div className="text-2xl font-bold text-blue-700">{roomStatusByFloor[selectedFloor]?.sold || 0}</div>
+                      <div className="text-2xl font-bold text-blue-700">{roomCounts.sold}</div>
                     </div>
                   </div>
                 </CardContent>
@@ -599,10 +673,20 @@ export default function ProjectDetails() {
             </div>
             
             <div className="mb-3 grid grid-cols-2 md:grid-cols-4 gap-3">
-              {Array.from({ length: project.floorCount }, (_, i) => i + 1).map((floor) => {
+              {Array.from({ length: project.floorCount }, (_, i) => i).map((floor) => {
                 // Calculate percentage of available rooms for this floor
                 const availablePercentage = roomStatusByFloor[floor] ? 
                   (roomStatusByFloor[floor].available / roomStatusByFloor[floor].total) * 100 : 0;
+                
+                // Get floor name based on index
+                const getFloorName = (index) => {
+                  if (project.id === "2") { // For Sarot Termal Palace
+                    if (index === 0) return "0. Kat (Zemin)";
+                    if (index === 7) return "7. Kat (Çatı)";
+                    return `${index}. Kat`;
+                  }
+                  return `Floor ${index + 1}`;
+                };
                 
                 return (
                 <Card 
@@ -623,7 +707,7 @@ export default function ProjectDetails() {
                     
                     <div className="flex items-center gap-2 mb-1">
                       <Layers className="h-4 w-4" />
-                      <div className="text-sm font-medium">Floor {floor}</div>
+                      <div className="text-sm font-medium">{getFloorName(floor)}</div>
                     </div>
                     
                     <div className="flex items-center gap-2">
@@ -652,18 +736,22 @@ export default function ProjectDetails() {
           </div>
             
           {/* Rooms grid for each floor */}
-          {Array.from({ length: project.floorCount }, (_, i) => i + 1).map((floor) => (
+          {Array.from({ length: project.floorCount }, (_, i) => i).map((floor) => (
             <TabsContent key={floor} value={floor.toString()} className="space-y-4">
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Calendar className="h-5 w-5" />
-                    Floor {floor} - Rooms ({roomStatusByFloor[floor]?.available || 0} available)
+                    {project.id === "2" ? (
+                      floor === 0 ? "0. Kat (Zemin)" : 
+                      floor === 7 ? "7. Kat (Çatı)" : 
+                      `${floor}. Kat`
+                    ) : `Floor ${floor + 1}`} - Rooms ({roomStatusByFloor[floor]?.available || 0} available)
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   {roomsByFloor[floor]?.length ? (
-                    <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-4">
+                    <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-12 gap-3">
                       {roomsByFloor[floor]?.map((room) => {
                         // Determine status colors and styles
                         const statusConfig = {

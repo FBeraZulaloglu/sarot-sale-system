@@ -1,11 +1,11 @@
-
+import { useState } from "react";
 import { format } from "date-fns";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { Building2, Calendar, User } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Building2, Calendar, User, Check, X } from "lucide-react";
 import { SaleRecord, Project, Room } from "@/types";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { toast } from "sonner";
 
 interface PurchaseHistoryProps {
   customerSales: SaleRecord[];
@@ -14,12 +14,25 @@ interface PurchaseHistoryProps {
 }
 
 export function PurchaseHistory({ customerSales, projects, rooms }: PurchaseHistoryProps) {
+  // State to track dues payment status for each sale
+  const [duesStatus, setDuesStatus] = useState<Record<string, 'paid' | 'unpaid'>>({});
+  
+  // Function to handle dues status change
+  const handleDuesStatusChange = (saleId: string, status: 'paid' | 'unpaid') => {
+    setDuesStatus(prev => ({
+      ...prev,
+      [saleId]: status
+    }));
+    
+    // Show toast notification
+    toast.success(`Aidat durumu ${status === 'paid' ? 'Ödendi' : 'Ödenmedi'} olarak güncellendi`);
+  };
   return (
     <Card className="mb-8">
       <CardHeader>
-        <CardTitle>Purchase History</CardTitle>
+        <CardTitle>Ownership</CardTitle>
         <CardDescription>
-          Complete record of purchase transactions
+          Complete record of property ownership
         </CardDescription>
       </CardHeader>
       <CardContent className="p-0">
@@ -29,9 +42,7 @@ export function PurchaseHistory({ customerSales, projects, rooms }: PurchaseHist
               <TableHead>Date</TableHead>
               <TableHead>Project</TableHead>
               <TableHead>Room</TableHead>
-              <TableHead>Amount</TableHead>
-              <TableHead>Payment Status</TableHead>
-              <TableHead>Payment Method</TableHead>
+              <TableHead>Aidat Ödeme</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -60,31 +71,50 @@ export function PurchaseHistory({ customerSales, projects, rooms }: PurchaseHist
                         {room?.roomNumber || "Unknown Room"}
                       </div>
                     </TableCell>
-                    <TableCell className="font-medium">
-                      ${sale.amount.toLocaleString()}
-                    </TableCell>
                     <TableCell>
-                      <Badge
-                        className={cn(
-                          sale.paymentStatus === "completed" && "bg-green-100 text-green-800 hover:bg-green-100/80",
-                          sale.paymentStatus === "pending" && "bg-yellow-100 text-yellow-800 hover:bg-yellow-100/80",
-                          sale.paymentStatus === "failed" && "bg-red-100 text-red-800 hover:bg-red-100/80"
-                        )}
+                      <Select
+                        defaultValue={typeof sale.id === 'number' ? (sale.id % 2 === 0 ? 'paid' : 'unpaid') : 'unpaid'}
+                        value={duesStatus[sale.id] || (typeof sale.id === 'number' ? (sale.id % 2 === 0 ? 'paid' : 'unpaid') : 'unpaid')}
+                        onValueChange={(value) => handleDuesStatusChange(sale.id, value as 'paid' | 'unpaid')}
                       >
-                        {sale.paymentStatus.charAt(0).toUpperCase() + sale.paymentStatus.slice(1)}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      {sale.paymentMethod === "credit_card" ? "Credit Card" : 
-                       sale.paymentMethod === "bank_transfer" ? "Bank Transfer" : "Cash"}
+                        <SelectTrigger className="w-[120px]">
+                          <SelectValue>
+                            {duesStatus[sale.id] === 'paid' || (duesStatus[sale.id] === undefined && typeof sale.id === 'number' && sale.id % 2 === 0) ? (
+                              <div className="flex items-center gap-2">
+                                <Check className="h-4 w-4 text-green-600" />
+                                <span className="text-green-700">Ödendi</span>
+                              </div>
+                            ) : (
+                              <div className="flex items-center gap-2">
+                                <X className="h-4 w-4 text-red-600" />
+                                <span className="text-red-700">Ödenmedi</span>
+                              </div>
+                            )}
+                          </SelectValue>
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="paid">
+                            <div className="flex items-center gap-2">
+                              <Check className="h-4 w-4 text-green-600" />
+                              <span>Ödendi</span>
+                            </div>
+                          </SelectItem>
+                          <SelectItem value="unpaid">
+                            <div className="flex items-center gap-2">
+                              <X className="h-4 w-4 text-red-600" />
+                              <span>Ödenmedi</span>
+                            </div>
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
                     </TableCell>
                   </TableRow>
                 );
               })
             ) : (
               <TableRow>
-                <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
-                  No purchase history found for this customer.
+                <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
+                  No ownership records found for this customer.
                 </TableCell>
               </TableRow>
             )}

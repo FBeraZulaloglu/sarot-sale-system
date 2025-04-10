@@ -50,8 +50,8 @@ export default function CustomerDetails() {
   // Generate mock sales for this customer
   const customerSales = generateCustomerSales(customer.id, MOCK_PROJECTS, MOCK_ROOMS);
   
-  // Get customer's associated project
-  const associatedProject = MOCK_PROJECTS.find(p => p.id === customer.associatedProjectId);
+  // Get customer's associated projects
+  const associatedProjects = MOCK_PROJECTS.filter(p => customer.associatedProjectIds.includes(p.id));
 
   return (
     <MainLayout>
@@ -66,8 +66,10 @@ export default function CustomerDetails() {
         {/* Customer Profile */}
         <CustomerProfile 
           customer={customer} 
-          associatedProject={associatedProject} 
-          customerSales={customerSales} 
+          associatedProjects={associatedProjects} 
+          customerSales={customerSales}
+          projects={MOCK_PROJECTS}
+          rooms={MOCK_ROOMS} 
         />
 
         {/* Purchase History */}

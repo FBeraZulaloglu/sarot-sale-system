@@ -8,6 +8,13 @@ import { Input } from "@/components/ui/input";
 import { Form, FormField, FormItem, FormLabel, FormControl } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 // Define the type for customer notes
 interface CustomerNote {
@@ -30,6 +37,8 @@ interface CustomerNotesProps {
 }
 
 export function CustomerNotes({ customerId, customerName }: CustomerNotesProps) {
+  // No predefined notes anymore
+
   // Sample mock data for customer notes
   const [notes, setNotes] = useState<CustomerNote[]>([
     {
@@ -155,6 +164,8 @@ export function CustomerNotes({ customerId, customerName }: CustomerNotesProps) 
                   />
                 </div>
               </div>
+
+              {/* Quick Notes section removed */}
 
               <FormField
                 control={form.control}

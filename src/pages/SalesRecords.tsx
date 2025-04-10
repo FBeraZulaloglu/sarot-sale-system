@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { SearchIcon, Download, XCircle, Info } from "lucide-react";
+import { SearchIcon, Download, XCircle, Info, FileText, BadgeCheck } from "lucide-react";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationEllipsis, PaginationPrevious, PaginationNext } from "@/components/ui/pagination";
 import { cn } from "@/lib/utils";
 import { SaleRecordWithDetails, Project, Room, Customer, User } from "@/types";
@@ -42,6 +42,14 @@ const MOCK_PROJECTS = [
     imageUrl: "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=2070&auto=format&fit=crop",
     image3dUrl: "https://images.unsplash.com/photo-1582719508461-905c673771fd?q=80&w=1925&auto=format&fit=crop",
     createdAt: new Date().toISOString(),
+    type: 'single', // Add project type
+    houses: [{ // Add houses array
+      id: 'house-1-1',
+      name: 'Main Building',
+      projectId: '1',
+      floorCount: 8,
+      roomCount: 120
+    }]
   },
   {
     id: "2",
@@ -52,6 +60,14 @@ const MOCK_PROJECTS = [
     imageUrl: "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?q=80&w=2070&auto=format&fit=crop",
     image3dUrl: "https://images.unsplash.com/photo-1540541338287-41700207dee6?q=80&w=2070&auto=format&fit=crop",
     createdAt: new Date().toISOString(),
+    type: 'single',
+    houses: [{
+      id: 'house-2-1',
+      name: 'Beach Building',
+      projectId: '2',
+      floorCount: 6,
+      roomCount: 90
+    }]
   },
   {
     id: "3",
@@ -62,6 +78,14 @@ const MOCK_PROJECTS = [
     imageUrl: "https://images.unsplash.com/photo-1531088009183-5ff5b7c95f91?q=80&w=1974&auto=format&fit=crop",
     image3dUrl: "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?q=80&w=2070&auto=format&fit=crop",
     createdAt: new Date().toISOString(),
+    type: 'single',
+    houses: [{
+      id: 'house-3-1',
+      name: 'Lodge Building',
+      projectId: '3',
+      floorCount: 5,
+      roomCount: 80
+    }]
   },
   {
     id: "4",
@@ -72,6 +96,14 @@ const MOCK_PROJECTS = [
     imageUrl: "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?q=80&w=2070&auto=format&fit=crop",
     image3dUrl: "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?q=80&w=2070&auto=format&fit=crop",
     createdAt: new Date().toISOString(),
+    type: 'single',
+    houses: [{
+      id: 'house-4-1',
+      name: 'Boutique Building',
+      projectId: '4',
+      floorCount: 4,
+      roomCount: 60
+    }]
   },
   {
     id: "5",
@@ -82,6 +114,14 @@ const MOCK_PROJECTS = [
     imageUrl: "https://images.unsplash.com/photo-1529551739587-e242c564f727?q=80&w=2046&auto=format&fit=crop",
     image3dUrl: "https://images.unsplash.com/photo-1564501049412-61c2a3083791?q=80&w=2064&auto=format&fit=crop",
     createdAt: new Date().toISOString(),
+    type: 'single',
+    houses: [{
+      id: 'house-5-1',
+      name: 'Palace Building',
+      projectId: '5',
+      floorCount: 7,
+      roomCount: 100
+    }]
   },
   {
     id: "6",
@@ -92,6 +132,14 @@ const MOCK_PROJECTS = [
     imageUrl: "https://images.unsplash.com/photo-1596436889106-be35e843f974?q=80&w=2070&auto=format&fit=crop",
     image3dUrl: "https://images.unsplash.com/photo-1540555700478-4be289fbecef?q=80&w=2070&auto=format&fit=crop",
     createdAt: new Date().toISOString(),
+    type: 'single',
+    houses: [{
+      id: 'house-6-1',
+      name: 'Tower Building',
+      projectId: '6',
+      floorCount: 30,
+      roomCount: 150
+    }]
   },
 ];
 
@@ -103,7 +151,7 @@ const MOCK_CUSTOMERS: Customer[] = [
     surname: "Doe",
     email: "john.doe@example.com",
     phone: "+1 (555) 123-4567",
-    associatedProjectId: "1",
+    associatedProjectIds: ["1"],
     createdAt: new Date().toISOString(),
   },
   {
@@ -112,7 +160,7 @@ const MOCK_CUSTOMERS: Customer[] = [
     surname: "Smith",
     email: "jane.smith@example.com",
     phone: "+1 (555) 987-6543",
-    associatedProjectId: "2",
+    associatedProjectIds: ["2"],
     createdAt: new Date().toISOString(),
   },
   {
@@ -121,7 +169,7 @@ const MOCK_CUSTOMERS: Customer[] = [
     surname: "Johnson",
     email: "robert.j@example.com",
     phone: "+1 (555) 456-7890",
-    associatedProjectId: "1",
+    associatedProjectIds: ["1"],
     createdAt: new Date().toISOString(),
   },
 ];
@@ -162,6 +210,7 @@ const generateMockRooms = (projectId: string, floorCount: number): Room[] => {
       rooms.push({
         id: `${projectId}-${roomNumber}`,
         projectId,
+        houseId: `house-${projectId}-1`, // Add required houseId property
         floor,
         roomNumber,
         status: Math.random() > 0.7 ? 'sold' : Math.random() > 0.5 ? 'reserved' : 'available',
@@ -249,22 +298,44 @@ export default function SalesRecords() {
     paymentMethod: "all", 
     search: "",
     showCanceled: "all", // New filter for canceled sales
+    saleStatus: "all", // New filter for sale status (pending/confirmed)
   });
 
-  // State for sale cancellation
+  // State for sale cancellation and confirmation
   const [selectedSale, setSelectedSale] = useState<SaleRecordWithDetails | null>(null);
   const [cancellationReason, setCancellationReason] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
+  const [isFinalConfirmDialogOpen, setIsFinalConfirmDialogOpen] = useState(false);
+  const [forceUpdate, setForceUpdate] = useState(0); // Used to force re-render after confirming a sale
 
   // Handler for filter changes
   const handleFilterChange = (key: string, value: any) => {
     setFilters(prev => ({ ...prev, [key]: value }));
   };
 
-  // Function to handle sale cancellation
-  const handleCancelSale = () => {
-    if (!selectedSale || !cancellationReason.trim()) return;
+  // Function to handle initial cancellation request - shows reason dialog
+  const handleInitialCancelRequest = () => {
+    setIsConfirmDialogOpen(false);
+    setIsDialogOpen(true);
+  };
 
+  // Function to handle sale cancellation - shows final confirmation dialog
+  const handleCancelSale = () => {
+    if (!selectedSale || !cancellationReason.trim()) {
+      toast.error("İptal sebebi belirtmelisiniz.");
+      return;
+    }
+
+    // Show final confirmation dialog
+    setIsDialogOpen(false);
+    setIsFinalConfirmDialogOpen(true);
+  };
+
+  // Function to finalize the cancellation after final confirmation
+  const finalizeCancellation = () => {
+    if (!selectedSale) return;
+    
     // In a real app, this would be an API call
     // For now, we'll update the mock data directly
     const updatedRecords = MOCK_SALES_RECORDS.map(record => {
@@ -287,10 +358,10 @@ export default function SalesRecords() {
     // Reset state
     setSelectedSale(null);
     setCancellationReason("");
-    setIsDialogOpen(false);
+    setIsFinalConfirmDialogOpen(false);
 
     // Show success message
-    toast.success("Sale has been canceled successfully");
+    toast.success("Satış başarıyla iptal edildi.");
   };
 
   // Apply filters to sales records
@@ -314,6 +385,20 @@ export default function SalesRecords() {
     if (filters.showCanceled === "canceled" && !record.isCanceled) {
       return false;
     } else if (filters.showCanceled === "active" && record.isCanceled) {
+      return false;
+    }
+    
+    // Filter by sale status (pending/confirmed)
+    if (filters.saleStatus === "pending" && (record.isConfirmed || record.isCanceled)) {
+      return false;
+    } else if (filters.saleStatus === "confirmed" && (!record.isConfirmed || record.isCanceled)) {
+      return false;
+    }
+    
+    // Filter by sale status (pending/confirmed)
+    if (filters.saleStatus === "pending" && (record.isConfirmed || record.isCanceled)) {
+      return false;
+    } else if (filters.saleStatus === "confirmed" && (!record.isConfirmed || record.isCanceled)) {
       return false;
     }
 
@@ -501,6 +586,25 @@ export default function SalesRecords() {
                 </Select>
               </div>
               
+              {/* Sale Status Filter */}
+              <div>
+                <Label htmlFor="saleStatusFilter">Satış Durumu</Label>
+                <Select
+                  value={filters.saleStatus}
+                  onValueChange={(value) => handleFilterChange("saleStatus", value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Tüm Satış Durumları" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Tüm Satışlar</SelectItem>
+                    <SelectItem value="pending">Bekleyen Satışlar</SelectItem>
+                    <SelectItem value="confirmed">Kesinleşmiş Satışlar</SelectItem>
+                    <SelectItem value="canceled">İptal Edilmiş Satışlar</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
               {/* Payment Method Filter */}
               <div>
                 <Label htmlFor="paymentMethodFilter">Ödeme Tipi</Label>
@@ -577,14 +681,6 @@ export default function SalesRecords() {
               >
                 <Download className="mr-1" />
                 Kayıtları İndir
-              </Button>
-
-              <Button
-                variant="destructive"
-                onClick={() => navigate("/cancellable-sales")}
-              >
-                <XCircle className="mr-1" />
-                İptal Edilebilir Satışlar
               </Button>
             </div>
           </CardContent>
@@ -679,17 +775,28 @@ export default function SalesRecords() {
                             </TooltipProvider>
                           </div>
                         ) : (
-                          <Button
-                            variant="destructive"
-                            onClick={() => {
-                              setSelectedSale(record);
-                              setIsDialogOpen(true);
-                            }}
-                            className="flex items-center gap-1"
-                          >
-                            <XCircle className="h-4 w-4" />
-                            İptal Et
-                          </Button>
+                          <div className="flex space-x-2">
+                            <Button
+                              variant="outline"
+                              className="border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700 flex items-center gap-1"
+                              onClick={() => {
+                                setSelectedSale(record);
+                                setIsConfirmDialogOpen(true);
+                              }}
+                            >
+                              <XCircle className="h-4 w-4" />
+                              İptal Et
+                            </Button>
+                            
+                            <Button
+                              variant="outline"
+                              className="border-amber-200 bg-amber-600 text-white hover:bg-amber-700 hover:text-white flex items-center gap-1"
+                              onClick={() => navigate(`/tapu-islemleri/new?customerId=${record.customerId}`)}
+                            >
+                              <FileText className="h-4 w-4" />
+                              Tapu Oluştur
+                            </Button>
+                          </div>
                         )}
                       </TableCell>
                     </TableRow>
@@ -755,25 +862,78 @@ export default function SalesRecords() {
           </div>
         )}
         
-        {/* Cancellation Dialog */}
+        {/* Initial Confirmation Dialog */}
+        <Dialog open={isConfirmDialogOpen} onOpenChange={(open) => setIsConfirmDialogOpen(open)}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Satış İptal Onayı</DialogTitle>
+              <DialogDescription>
+                Bu satışı iptal etmek istediğinizden emin misiniz? Bu işlem geri alınamaz.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter className="mt-4">
+              <Button variant="outline" onClick={() => setIsConfirmDialogOpen(false)}>
+                Vazgeç
+              </Button>
+              <Button 
+                variant="destructive" 
+                onClick={() => {
+                  setIsConfirmDialogOpen(false);
+                  setIsDialogOpen(true);
+                }}
+              >
+                Devam Et
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+        
+        {/* Cancellation Reason Dialog */}
         <Dialog open={isDialogOpen} onOpenChange={(open) => setIsDialogOpen(open)}>
           <DialogContent>
             <DialogHeader>
               <DialogTitle>İptal Sebebi</DialogTitle>
+              <DialogDescription>
+                Lütfen satışı iptal etme sebebinizi belirtin.
+              </DialogDescription>
             </DialogHeader>
             <div className="py-4">
               <Textarea
                 value={cancellationReason}
                 onChange={(e) => setCancellationReason(e.target.value)}
                 placeholder="İptal sebebini giriniz"
+                className="min-h-[100px]"
               />
             </div>
             <DialogFooter>
-              <Button variant="destructive" onClick={handleCancelSale}>
-                İptal Et
-              </Button>
               <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
-                İptal
+                Vazgeç
+              </Button>
+              <Button variant="destructive" onClick={handleCancelSale}>
+                Devam Et
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+        
+        {/* Final Confirmation Dialog */}
+        <Dialog open={isFinalConfirmDialogOpen} onOpenChange={(open) => setIsFinalConfirmDialogOpen(open)}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Son Onay</DialogTitle>
+              <DialogDescription>
+                Bu satışı iptal etmek üzeresiniz. Bu işlem geri alınamaz. Devam etmek istediğinizden emin misiniz?
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter className="mt-4">
+              <Button variant="outline" onClick={() => setIsFinalConfirmDialogOpen(false)}>
+                Vazgeç
+              </Button>
+              <Button 
+                variant="destructive" 
+                onClick={finalizeCancellation}
+              >
+                Evet, İptal Et
               </Button>
             </DialogFooter>
           </DialogContent>

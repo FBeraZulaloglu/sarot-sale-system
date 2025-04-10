@@ -5,8 +5,18 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Search, User, ArrowRight, Mail, Phone, Plus } from "lucide-react";
+import { Search, User, ArrowRight, Mail, Phone, Plus, Building2 } from "lucide-react";
 import { Customer } from "@/types";
+
+// Project name mapping
+const PROJECT_NAMES: Record<string, string> = {
+  "1": "Burj Al Babas",
+  "2": "Sarot Palace",
+  "3": "Sarot Grand Resort & Spa",
+  "4": "Sarot Boutique Hotel & Termal",
+  "5": "Sarot Teras Evler",
+  "6": "Sarot Bahçe Evleri",
+};
 
 // Mock customers data (using the same data from SalesRecords.tsx)
 const MOCK_CUSTOMERS: Customer[] = [
@@ -16,7 +26,7 @@ const MOCK_CUSTOMERS: Customer[] = [
     surname: "Doe",
     email: "john.doe@example.com",
     phone: "+1 (555) 123-4567",
-    associatedProjectId: "1",
+    associatedProjectIds: ["1", "3"],
     createdAt: new Date().toISOString(),
   },
   {
@@ -25,7 +35,7 @@ const MOCK_CUSTOMERS: Customer[] = [
     surname: "Smith",
     email: "jane.smith@example.com",
     phone: "+1 (555) 987-6543",
-    associatedProjectId: "2",
+    associatedProjectIds: ["2", "5"],
     createdAt: new Date().toISOString(),
   },
   {
@@ -34,7 +44,7 @@ const MOCK_CUSTOMERS: Customer[] = [
     surname: "Johnson",
     email: "robert.j@example.com",
     phone: "+1 (555) 456-7890",
-    associatedProjectId: "1",
+    associatedProjectIds: ["1"],
     createdAt: new Date().toISOString(),
   },
   {
@@ -43,7 +53,7 @@ const MOCK_CUSTOMERS: Customer[] = [
     surname: "Williams",
     email: "emily.w@example.com",
     phone: "+1 (555) 234-5678",
-    associatedProjectId: "3",
+    associatedProjectIds: ["3", "4"],
     createdAt: new Date().toISOString(),
   },
   {
@@ -52,7 +62,7 @@ const MOCK_CUSTOMERS: Customer[] = [
     surname: "Brown",
     email: "michael.b@example.com",
     phone: "+1 (555) 876-5432",
-    associatedProjectId: "2",
+    associatedProjectIds: ["2", "6"],
     createdAt: new Date().toISOString(),
   },
   {
@@ -61,7 +71,7 @@ const MOCK_CUSTOMERS: Customer[] = [
     surname: "Davis",
     email: "sarah.d@example.com",
     phone: "+1 (555) 345-6789",
-    associatedProjectId: "4",
+    associatedProjectIds: ["4", "1"],
     createdAt: new Date().toISOString(),
   },
   {
@@ -70,7 +80,7 @@ const MOCK_CUSTOMERS: Customer[] = [
     surname: "Miller",
     email: "david.m@example.com",
     phone: "+1 (555) 765-4321",
-    associatedProjectId: "5",
+    associatedProjectIds: ["5", "3"],
     createdAt: new Date().toISOString(),
   },
   {
@@ -79,7 +89,7 @@ const MOCK_CUSTOMERS: Customer[] = [
     surname: "Wilson",
     email: "jennifer.w@example.com",
     phone: "+1 (555) 432-1098",
-    associatedProjectId: "6",
+    associatedProjectIds: ["6", "2", "4"],
     createdAt: new Date().toISOString(),
   },
 ];
@@ -87,11 +97,32 @@ const MOCK_CUSTOMERS: Customer[] = [
 export default function Customers() {
   const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
+  
+  // Function to determine if a customer is active
+  const isCustomerActive = (customerId: string) => {
+    // Simple logic for demo - customers with ID divisible by 3 are inactive
+    const id = parseInt(customerId);
+    return !isNaN(id) && id % 3 !== 0;
+  };
+
+  // Get project name by ID - keeping this for reference
+  const getProjectName = (projectId: string) => {
+    return PROJECT_NAMES[projectId] || "Unknown Project";
+  };
+  
+  // Check if customer has paid dues
+  const hasPaidDues = (customerId: string) => {
+    // Using a simple algorithm based on customer ID for demo purposes
+    // In a real app, this would check a payment status from the database
+    const id = parseInt(customerId);
+    return !isNaN(id) && id % 2 === 0;
+  };
 
   // Filter customers based on search query
   const filteredCustomers = MOCK_CUSTOMERS.filter((customer) => {
     const fullName = `${customer.name} ${customer.surname}`.toLowerCase();
     const searchLower = searchQuery.toLowerCase();
+    
     return (
       fullName.includes(searchLower) ||
       customer.email.toLowerCase().includes(searchLower) ||
@@ -136,7 +167,8 @@ export default function Customers() {
                   <TableHead>Customer</TableHead>
                   <TableHead>Email</TableHead>
                   <TableHead>Phone</TableHead>
-                  <TableHead>Project ID</TableHead>
+                  <TableHead>Aidat</TableHead>
+                  <TableHead>Aktif</TableHead>
                   <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -166,7 +198,32 @@ export default function Customers() {
                           {customer.phone}
                         </div>
                       </TableCell>
-                      <TableCell>{customer.associatedProjectId}</TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          {hasPaidDues(customer.id) ? (
+                            <span className="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                              Ödendi
+                            </span>
+                          ) : (
+                            <span className="px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                              Ödenmedi
+                            </span>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          {isCustomerActive(customer.id) ? (
+                            <span className="px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                              Aktif
+                            </span>
+                          ) : (
+                            <span className="px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                              Pasif
+                            </span>
+                          )}
+                        </div>
+                      </TableCell>
                       <TableCell>
                         <Button
                           variant="outline"
@@ -184,7 +241,7 @@ export default function Customers() {
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
+                    <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
                       No customers found matching your search.
                     </TableCell>
                   </TableRow>

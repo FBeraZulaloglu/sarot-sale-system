@@ -18,6 +18,8 @@ import Customers from "./pages/Customers";
 import CustomerDetails from "./pages/CustomerDetails";
 import CustomerForm from "./pages/CustomerForm";
 import UserManagement from "./pages/UserManagement";
+import TapuList from "./pages/TapuList";
+import TapuOperations from "./pages/TapuOperations";
 
 const queryClient = new QueryClient();
 
@@ -38,6 +40,9 @@ const App = () => (
             <Route path="/customers" element={<Customers />} />
             <Route path="/customers/new" element={<CustomerForm />} />
             <Route path="/customers/:customerId" element={<CustomerDetails />} />
+            <Route path="/tapu-islemleri" element={<TapuList />} />
+            <Route path="/tapu-islemleri/new" element={<TapuOperations />} />
+            <Route path="/tapu-islemleri/:id" element={<TapuOperations />} />
             <Route path="/users" element={<UserManagement />} />
             <Route path="*" element={<NotFound />} />
           </Routes>

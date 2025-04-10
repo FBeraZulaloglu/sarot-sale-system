@@ -1,23 +1,48 @@
-
-import { format } from "date-fns";
+// Helper function to format date instead of using date-fns
+const formatDate = (date: Date | string) => {
+  const d = new Date(date);
+  const months = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
+  ];
+  return `${months[d.getMonth()]} ${d.getFullYear()}`;
+};
+import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Building2, Mail, Phone } from "lucide-react";
-import { Customer, Project, SaleRecord } from "@/types";
+import { Mail, Phone, Building2, Calendar, User, Check, X } from "lucide-react";
+import { Customer, Project, SaleRecord, Room } from "@/types";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { toast } from "sonner";
 
 interface CustomerProfileProps {
   customer: Customer;
-  associatedProject: Project | undefined;
+  associatedProjects: Project[];
   customerSales: SaleRecord[];
+  projects: Project[];
+  rooms: Room[];
 }
 
-export function CustomerProfile({ customer, associatedProject, customerSales }: CustomerProfileProps) {
+export function CustomerProfile({ customer, associatedProjects, customerSales, projects, rooms }: CustomerProfileProps) {
+  // State to track dues payment status for each sale
+  const [duesStatus, setDuesStatus] = useState<Record<string, 'paid' | 'unpaid'>>({});
+  
+  // Function to handle dues status change
+  const handleDuesStatusChange = (saleId: string, status: 'paid' | 'unpaid') => {
+    setDuesStatus(prev => ({
+      ...prev,
+      [saleId]: status
+    }));
+    
+    // Show toast notification
+    toast.success(`Aidat durumu ${status === 'paid' ? 'Ödendi' : 'Ödenmedi'} olarak güncellendi`);
+  };
   return (
     <Card className="mb-8">
-      <CardHeader>
-        <div className="flex items-center gap-4">
-          <Avatar className="h-16 w-16">
+      <CardHeader className="pb-0">
+        <div className="flex items-center gap-4 mb-4">
+          <Avatar className="h-16 w-16 shadow-sm">
             <AvatarFallback className="bg-primary text-primary-foreground text-xl">
               {customer.name.charAt(0)}{customer.surname.charAt(0)}
             </AvatarFallback>
@@ -27,86 +52,30 @@ export function CustomerProfile({ customer, associatedProject, customerSales }: 
               {customer.name} {customer.surname}
             </CardTitle>
             <CardDescription>
-              Customer since {format(new Date(customer.createdAt), "MMMM yyyy")}
+              Customer since {formatDate(customer.createdAt)}
             </CardDescription>
           </div>
         </div>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold">Contact Information</h3>
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <Mail className="h-4 w-4 text-muted-foreground" />
-                <span>{customer.email}</span>
+        <div className="w-full">
+          {/* Contact Information */}
+          <div className="bg-blue-50/50 dark:bg-blue-950/20 p-4 rounded-lg shadow-sm">
+            <h3 className="text-lg font-medium mb-3 text-blue-800 dark:text-blue-300">Contact Information</h3>
+            <div className="flex flex-wrap items-center gap-6">
+              <div className="flex items-center gap-3 p-2 rounded-md hover:bg-blue-100/50 dark:hover:bg-blue-900/20 transition-colors">
+                <Mail className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                <span>john.doe@example.com</span>
               </div>
-              <div className="flex items-center gap-2">
-                <Phone className="h-4 w-4 text-muted-foreground" />
-                <span>{customer.phone}</span>
+              <div className="flex items-center gap-3 p-2 rounded-md hover:bg-blue-100/50 dark:hover:bg-blue-900/20 transition-colors">
+                <Phone className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                <span>+90 555 123 4567</span>
+              </div>
+              <div className="flex items-center gap-3 p-2 rounded-md hover:bg-blue-100/50 dark:hover:bg-blue-900/20 transition-colors">
+                <Building2 className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                <span>Ankara, Turkey</span>
               </div>
             </div>
-          </div>
-
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold">Associated Project</h3>
-            {associatedProject ? (
-              <div className="flex items-center gap-3">
-                <div className="h-12 w-12 rounded-md overflow-hidden">
-                  <img 
-                    src={associatedProject.imageUrl} 
-                    alt={associatedProject.name}
-                    className="h-full w-full object-cover"
-                  />
-                </div>
-                <div>
-                  <p className="font-medium">{associatedProject.name}</p>
-                  <p className="text-sm text-muted-foreground line-clamp-1">
-                    {associatedProject.description}
-                  </p>
-                </div>
-              </div>
-            ) : (
-              <p className="text-muted-foreground">No associated project</p>
-            )}
-          </div>
-        </div>
-        
-        <Separator className="my-6" />
-        
-        <div className="space-y-2">
-          <h3 className="text-lg font-semibold mb-4">Purchase Summary</h3>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <Card className="bg-primary/5 border-none">
-              <CardContent className="p-4 text-center">
-                <p className="text-sm text-muted-foreground">Total Purchases</p>
-                <p className="text-2xl font-bold">{customerSales.length}</p>
-              </CardContent>
-            </Card>
-            <Card className="bg-primary/5 border-none">
-              <CardContent className="p-4 text-center">
-                <p className="text-sm text-muted-foreground">Total Spent</p>
-                <p className="text-2xl font-bold">
-                  ${customerSales.reduce((sum, sale) => sum + sale.amount, 0).toLocaleString()}
-                </p>
-              </CardContent>
-            </Card>
-            <Card className="bg-primary/5 border-none">
-              <CardContent className="p-4 text-center">
-                <p className="text-sm text-muted-foreground">Completed Payments</p>
-                <p className="text-2xl font-bold">
-                  {customerSales.filter(sale => sale.paymentStatus === 'completed').length}
-                </p>
-              </CardContent>
-            </Card>
-            <Card className="bg-primary/5 border-none">
-              <CardContent className="p-4 text-center">
-                <p className="text-sm text-muted-foreground">Pending Payments</p>
-                <p className="text-2xl font-bold">
-                  {customerSales.filter(sale => sale.paymentStatus === 'pending').length}
-                </p>
-              </CardContent>
-            </Card>
           </div>
         </div>
       </CardContent>

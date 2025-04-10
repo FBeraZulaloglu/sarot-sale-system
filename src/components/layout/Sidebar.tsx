@@ -17,7 +17,8 @@ import {
   ChevronRight,
   Store,
   Building,
-  XCircle
+  XCircle,
+  FileText
 } from "lucide-react";
 
 interface SidebarProps {
@@ -41,13 +42,7 @@ export function Sidebar({ className }: SidebarProps) {
       active: isActive("/"),
       roles: ["admin", "manager", "salesperson"],
     },
-    {
-      name: "Projects",
-      href: "/projects",
-      icon: Building2,
-      active: isActive("/projects") || location.pathname.startsWith("/projects/"),
-      roles: ["admin", "manager", "salesperson"],
-    },
+
     {
       name: "Sales Records",
       href: "/sales-records",
@@ -55,11 +50,12 @@ export function Sidebar({ className }: SidebarProps) {
       active: isActive("/sales-records") || location.pathname.startsWith("/sales/"),
       roles: ["admin", "manager", "salesperson"],
     },
+
     {
-      name: "Cancellable Sales",
-      href: "/cancellable-sales",
-      icon: XCircle,
-      active: isActive("/cancellable-sales") || location.pathname.startsWith("/cancel-sale/"),
+      name: "Tapu İşlemleri",
+      href: "/tapu-islemleri",
+      icon: FileText,
+      active: isActive("/tapu-islemleri") || location.pathname.startsWith("/tapu-islemleri/"),
       roles: ["admin", "manager", "salesperson"],
     },
     {

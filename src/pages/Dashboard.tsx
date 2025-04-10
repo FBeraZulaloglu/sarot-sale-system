@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
-import { Building2, User, BarChart3, Calendar, Home, Hotel, Building, Play } from "lucide-react";
+import { Building2, User, BarChart3, Calendar, Home, Hotel, Building, Play, FileText } from "lucide-react";
 import { Project } from "@/types";
 
 // Import projects data from Projects page
@@ -22,14 +22,24 @@ const MOCK_PROJECTS: Project[] = [
   },
   {
     id: "2",
-    name: "Sarot Palace",
-    description: "Luxurious palace-inspired residences with elegant design and exclusive amenities.",
-    roomCount: 120,
-    floorCount: 4,
+    name: "SAROT TERMAL PALACE",
+    description: "Luxurious palace-inspired residences with elegant design and exclusive amenities featuring multiple room types across 8 floors.",
+    roomCount: 388, // Total: 8 floors × (8 × 3+1 + 40 × 1+1) per floor + 4 × 4+1 + 8 × 3+1 + 28 × 2+1 on 7th floor
+    floorCount: 8, // 0-7 floors (8 floors total)
     imageUrl: "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?q=80&w=2070&auto=format&fit=crop",
     image3dUrl: "https://images.unsplash.com/photo-1540541338287-41700207dee6?q=80&w=2070&auto=format&fit=crop",
     createdAt: new Date().toISOString(),
-    type: "single",
+    type: "multi", // Multiple floor layouts
+    houses: [
+      { id: "2-0", name: "0. Kat (Zemin)", projectId: "2", floorCount: 1, roomCount: 48 }, // 8 × 3+1 + 40 × 1+1
+      { id: "2-1", name: "1. Kat", projectId: "2", floorCount: 1, roomCount: 48 }, // 8 × 3+1 + 40 × 1+1
+      { id: "2-2", name: "2. Kat", projectId: "2", floorCount: 1, roomCount: 48 }, // 8 × 3+1 + 40 × 1+1
+      { id: "2-3", name: "3. Kat", projectId: "2", floorCount: 1, roomCount: 48 }, // 8 × 3+1 + 40 × 1+1
+      { id: "2-4", name: "4. Kat", projectId: "2", floorCount: 1, roomCount: 48 }, // 8 × 3+1 + 40 × 1+1
+      { id: "2-5", name: "5. Kat", projectId: "2", floorCount: 1, roomCount: 48 }, // 8 × 3+1 + 40 × 1+1
+      { id: "2-6", name: "6. Kat", projectId: "2", floorCount: 1, roomCount: 48 }, // 8 × 3+1 + 40 × 1+1
+      { id: "2-7", name: "7. Kat (Çatı)", projectId: "2", floorCount: 1, roomCount: 40 }  // 4 × 4+1 + 8 × 3+1 + 28 × 2+1
+    ],
   },
   {
     id: "3",
@@ -67,17 +77,13 @@ const MOCK_PROJECTS: Project[] = [
   {
     id: "5",
     name: "Sarot Teras Evler",
-    description: "Modern terraced homes with panoramic views and contemporary design.",
+    description: "Modern terraced homes with panoramic views and contemporary design. All units are 1+1 rooms.",
     roomCount: 180,
     floorCount: 3,
     imageUrl: "https://images.unsplash.com/photo-1529551739587-e242c564f727?q=80&w=2046&auto=format&fit=crop",
     image3dUrl: "https://images.unsplash.com/photo-1564501049412-61c2a3083791?q=80&w=2064&auto=format&fit=crop",
     createdAt: new Date().toISOString(),
-    type: "multi",
-    houses: [
-      { id: "5-1", name: "Fulya", projectId: "5", floorCount: 3, roomCount: 12 },
-      { id: "5-2", name: "Sümbül", projectId: "5", floorCount: 3, roomCount: 12 },
-    ],
+    type: "single",
   },
   {
     id: "6",
@@ -101,7 +107,7 @@ export default function Dashboard() {
 
   const renderOverviewCards = () => {
     return (
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
         <Card className="card-hover">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Total Projects</CardTitle>
@@ -152,6 +158,24 @@ export default function Dashboard() {
             </p>
           </CardContent>
         </Card>
+        
+        <Card className="card-hover">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">Tapu İşlemleri</CardTitle>
+            <FileText className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">30</div>
+            <p className="text-xs text-muted-foreground">
+              Tapu kayıtları ve işlemleri
+            </p>
+          </CardContent>
+          <CardFooter className="p-0 pt-2">
+            <Button variant="outline" size="sm" className="w-full" asChild>
+              <Link to="/tapu-islemleri">Tüm Tapu Kayıtları</Link>
+            </Button>
+          </CardFooter>
+        </Card>
       </div>
     );
   };
@@ -188,20 +212,7 @@ export default function Dashboard() {
           </Button>
         </div>
         
-        <div className="flex gap-2 mb-4">
-          <Button variant="outline" className="gap-2">
-            <Home className="h-4 w-4" />
-            Tüm Projeler
-          </Button>
-          <Button variant="outline" className="gap-2">
-            <Building2 className="h-4 w-4" />
-            Konut Projeleri
-          </Button>
-          <Button variant="outline" className="gap-2">
-            <Hotel className="h-4 w-4" />
-            Otel Projeleri
-          </Button>
-        </div>
+        {/* Filter buttons removed */}
         
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {MOCK_PROJECTS.map((project) => (
@@ -222,11 +233,17 @@ export default function Dashboard() {
                 </div>
                 
                 {/* Status Badge */}
-                <div className="absolute top-2 right-2 flex gap-1">
-                  {project.type === "multi" && (
+                <div className="absolute top-2 right-2 flex flex-col gap-1">
+                  {project.id === "5" && (
+                    <Badge className="bg-green-500 hover:bg-green-600 flex items-center">
+                      <Building2 className="h-3 w-3 mr-1" />
+                      Tek Tip Konut
+                    </Badge>
+                  )}
+                  {project.id === "2" && (
                     <Badge className="bg-blue-500 hover:bg-blue-600 flex items-center">
                       <Building2 className="h-3 w-3 mr-1" />
-                      Çoklu Konut
+                      8 Kat
                     </Badge>
                   )}
                   {project.type === "hotel" && (
@@ -237,24 +254,9 @@ export default function Dashboard() {
                   )}
                 </div>
                 
-                {/* Video Button */}
-                <Button 
-                  variant="secondary" 
-                  size="sm" 
-                  className="absolute bottom-2 right-2 rounded-md bg-white/90 hover:bg-white text-red-500 hover:text-red-600 gap-1 shadow-sm"
-                >
-                  <Play className="h-4 w-4 fill-current" />
-                  Video
-                </Button>
+
                 
-                {/* Hotel Specific Badge */}
-                {project.type === "hotel" && project.houses && (
-                  <div className="absolute bottom-2 left-2 flex gap-1">
-                    <Badge variant="outline" className="bg-white/90 text-xs">
-                      {project.houses.length} Oda Tipi
-                    </Badge>
-                  </div>
-                )}
+                {/* Room Type Badge removed */}
               </div>
               
               <CardHeader className="pb-2">
@@ -283,39 +285,7 @@ export default function Dashboard() {
                   </div>
                 </div>
                 
-                {/* House Types Preview */}
-                {project.type === "multi" && project.houses && project.houses.length > 0 && (
-                  <div className="mt-3">
-                    <div className="text-xs text-muted-foreground mb-1">Konut Tipleri:</div>
-                    <div className="flex flex-wrap gap-1">
-                      {project.houses.slice(0, 3).map((house) => (
-                        <Button 
-                          key={house.id} 
-                          variant="outline" 
-                          size="sm" 
-                          className="text-xs"
-                          asChild
-                        >
-                          <Link to={`/projects/${project.id}?house=${house.id}`}>
-                            {house.name}
-                          </Link>
-                        </Button>
-                      ))}
-                      {project.houses.length > 3 && (
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          className="text-xs"
-                          asChild
-                        >
-                          <Link to={`/projects/${project.id}`}>
-                            +{project.houses.length - 3} daha
-                          </Link>
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-                )}
+
               </CardContent>
               
               <CardFooter className="flex flex-col gap-2">
@@ -329,28 +299,7 @@ export default function Dashboard() {
                   </Link>
                 </Button>
                 
-                <div className="flex gap-2 w-full">
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    className="flex-1"
-                    asChild
-                  >
-                    <Link to={`/projects/${project.id}`}>
-                      <Building className="h-4 w-4 mr-1" />
-                      Proje
-                    </Link>
-                  </Button>
-                  
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    className="flex-1 gap-1"
-                  >
-                    <Play className="h-4 w-4" />
-                    Video
-                  </Button>
-                </div>
+
               </CardFooter>
             </Card>
           ))}

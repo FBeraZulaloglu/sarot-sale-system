@@ -9,7 +9,7 @@ export const MOCK_CUSTOMERS: Customer[] = [
     surname: "Doe",
     email: "john.doe@example.com",
     phone: "+1 (555) 123-4567",
-    associatedProjectId: "1",
+    associatedProjectIds: ["1", "3"],
     createdAt: new Date().toISOString(),
   },
   {
@@ -18,7 +18,7 @@ export const MOCK_CUSTOMERS: Customer[] = [
     surname: "Smith",
     email: "jane.smith@example.com",
     phone: "+1 (555) 987-6543",
-    associatedProjectId: "2",
+    associatedProjectIds: ["2", "5"],
     createdAt: new Date().toISOString(),
   },
   {
@@ -27,7 +27,7 @@ export const MOCK_CUSTOMERS: Customer[] = [
     surname: "Johnson",
     email: "robert.j@example.com",
     phone: "+1 (555) 456-7890",
-    associatedProjectId: "1",
+    associatedProjectIds: ["1"],
     createdAt: new Date().toISOString(),
   },
   {
@@ -36,7 +36,7 @@ export const MOCK_CUSTOMERS: Customer[] = [
     surname: "Williams",
     email: "emily.w@example.com",
     phone: "+1 (555) 234-5678",
-    associatedProjectId: "3",
+    associatedProjectIds: ["3", "4"],
     createdAt: new Date().toISOString(),
   },
   {
@@ -45,7 +45,7 @@ export const MOCK_CUSTOMERS: Customer[] = [
     surname: "Brown",
     email: "michael.b@example.com",
     phone: "+1 (555) 876-5432",
-    associatedProjectId: "2",
+    associatedProjectIds: ["2", "6"],
     createdAt: new Date().toISOString(),
   },
   {
@@ -54,7 +54,7 @@ export const MOCK_CUSTOMERS: Customer[] = [
     surname: "Davis",
     email: "sarah.d@example.com",
     phone: "+1 (555) 345-6789",
-    associatedProjectId: "4",
+    associatedProjectIds: ["4", "1"],
     createdAt: new Date().toISOString(),
   },
   {
@@ -63,7 +63,7 @@ export const MOCK_CUSTOMERS: Customer[] = [
     surname: "Miller",
     email: "david.m@example.com",
     phone: "+1 (555) 765-4321",
-    associatedProjectId: "5",
+    associatedProjectIds: ["5", "3"],
     createdAt: new Date().toISOString(),
   },
   {
@@ -72,7 +72,7 @@ export const MOCK_CUSTOMERS: Customer[] = [
     surname: "Wilson",
     email: "jennifer.w@example.com",
     phone: "+1 (555) 432-1098",
-    associatedProjectId: "6",
+    associatedProjectIds: ["6", "2", "4"],
     createdAt: new Date().toISOString(),
   },
 ];
@@ -88,6 +88,7 @@ export const MOCK_PROJECTS: Project[] = [
     imageUrl: "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=2070&auto=format&fit=crop",
     image3dUrl: "https://images.unsplash.com/photo-1582719508461-905c673771fd?q=80&w=1925&auto=format&fit=crop",
     createdAt: new Date().toISOString(),
+    type: "hotel",
   },
   {
     id: "2",
@@ -98,6 +99,7 @@ export const MOCK_PROJECTS: Project[] = [
     imageUrl: "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?q=80&w=2070&auto=format&fit=crop",
     image3dUrl: "https://images.unsplash.com/photo-1540541338287-41700207dee6?q=80&w=2070&auto=format&fit=crop",
     createdAt: new Date().toISOString(),
+    type: "multi",
   },
   {
     id: "3",
@@ -108,6 +110,7 @@ export const MOCK_PROJECTS: Project[] = [
     imageUrl: "https://images.unsplash.com/photo-1531088009183-5ff5b7c95f91?q=80&w=1974&auto=format&fit=crop",
     image3dUrl: "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?q=80&w=2070&auto=format&fit=crop",
     createdAt: new Date().toISOString(),
+    type: "single",
   },
   {
     id: "4",
@@ -118,6 +121,7 @@ export const MOCK_PROJECTS: Project[] = [
     imageUrl: "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?q=80&w=2070&auto=format&fit=crop",
     image3dUrl: "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?q=80&w=2070&auto=format&fit=crop",
     createdAt: new Date().toISOString(),
+    type: "hotel",
   },
   {
     id: "5",
@@ -128,6 +132,7 @@ export const MOCK_PROJECTS: Project[] = [
     imageUrl: "https://images.unsplash.com/photo-1529551739587-e242c564f727?q=80&w=2046&auto=format&fit=crop",
     image3dUrl: "https://images.unsplash.com/photo-1564501049412-61c2a3083791?q=80&w=2064&auto=format&fit=crop",
     createdAt: new Date().toISOString(),
+    type: "single",
   },
   {
     id: "6",
@@ -138,5 +143,6 @@ export const MOCK_PROJECTS: Project[] = [
     imageUrl: "https://images.unsplash.com/photo-1596436889106-be35e843f974?q=80&w=2070&auto=format&fit=crop",
     image3dUrl: "https://images.unsplash.com/photo-1540555700478-4be289fbecef?q=80&w=2070&auto=format&fit=crop",
     createdAt: new Date().toISOString(),
+    type: "multi",
   },
 ];

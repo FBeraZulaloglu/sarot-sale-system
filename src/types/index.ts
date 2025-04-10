@@ -74,7 +74,7 @@ export interface Customer {
   surname: string;
   email: string;
   phone: string;
-  associatedProjectId: string;
+  associatedProjectIds: string[]; // Changed from single associatedProjectId to array
   createdAt: string;
 }
 
@@ -102,4 +102,30 @@ export interface SaleRecordWithDetails extends SaleRecord {
   room?: Room;
   customer?: Customer;
   salesperson?: User;
+}
+
+export type TapuStatus = 'pending' | 'completed' | 'canceled';
+
+export interface Tapu {
+  id: string;
+  customerId: string;
+  projectId: string;
+  roomId: string;
+  tapuNo: string;
+  tapuDate: string;
+  donem: string; // Period (Dönem)
+  week?: string;
+  tapuBedeli: number; // Deed fee
+  ipotekli: boolean; // Mortgaged
+  ipotekBedeli?: number; // Mortgage amount
+  tapuVerildi: boolean; // Deed delivered
+  faturaKesildi: boolean; // Invoice issued
+  alacaklarTemlikSozlesmesi: boolean; // Assignment of receivables agreement
+  odemeninTamamlandiginaDairBelge: boolean; // Payment completion document
+  fotografliVekaletname: boolean; // Photographed power of attorney
+  sozlesmeVeEkleriGerilAlindi: boolean; // Contract and attachments returned
+  tapuMasrafi: boolean; // Deed expenses
+  onay: boolean; // Approval
+  aciklama?: string; // Notes/explanation
+  createdAt: string;
 }
