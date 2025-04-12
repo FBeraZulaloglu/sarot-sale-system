@@ -5,8 +5,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Search, User, ArrowRight, Mail, Phone, Plus, Building2 } from "lucide-react";
+import { Search, User, ArrowRight, Mail, Phone, Building2 } from "lucide-react";
 import { Customer } from "@/types";
+import { MOCK_CUSTOMERS } from "@/data/customers";
 
 // Project name mapping
 const PROJECT_NAMES: Record<string, string> = {
@@ -17,82 +18,6 @@ const PROJECT_NAMES: Record<string, string> = {
   "5": "Sarot Teras Evler",
   "6": "Sarot Bahçe Evleri",
 };
-
-// Mock customers data (using the same data from SalesRecords.tsx)
-const MOCK_CUSTOMERS: Customer[] = [
-  {
-    id: "1",
-    name: "John",
-    surname: "Doe",
-    email: "john.doe@example.com",
-    phone: "+1 (555) 123-4567",
-    associatedProjectIds: ["1", "3"],
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: "2",
-    name: "Jane",
-    surname: "Smith",
-    email: "jane.smith@example.com",
-    phone: "+1 (555) 987-6543",
-    associatedProjectIds: ["2", "5"],
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: "3",
-    name: "Robert",
-    surname: "Johnson",
-    email: "robert.j@example.com",
-    phone: "+1 (555) 456-7890",
-    associatedProjectIds: ["1"],
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: "4",
-    name: "Emily",
-    surname: "Williams",
-    email: "emily.w@example.com",
-    phone: "+1 (555) 234-5678",
-    associatedProjectIds: ["3", "4"],
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: "5",
-    name: "Michael",
-    surname: "Brown",
-    email: "michael.b@example.com",
-    phone: "+1 (555) 876-5432",
-    associatedProjectIds: ["2", "6"],
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: "6",
-    name: "Sarah",
-    surname: "Davis",
-    email: "sarah.d@example.com",
-    phone: "+1 (555) 345-6789",
-    associatedProjectIds: ["4", "1"],
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: "7",
-    name: "David",
-    surname: "Miller",
-    email: "david.m@example.com",
-    phone: "+1 (555) 765-4321",
-    associatedProjectIds: ["5", "3"],
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: "8",
-    name: "Jennifer",
-    surname: "Wilson",
-    email: "jennifer.w@example.com",
-    phone: "+1 (555) 432-1098",
-    associatedProjectIds: ["6", "2", "4"],
-    createdAt: new Date().toISOString(),
-  },
-];
 
 export default function Customers() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -132,24 +57,22 @@ export default function Customers() {
 
   return (
     <MainLayout>
-      <div className="container mx-auto px-4 py-6">
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-3xl font-bold">Customers</h1>
-          <Button onClick={() => navigate("/customers/new")}>
-            <Plus className="mr-2 h-4 w-4" /> New Customer
-          </Button>
+      <div className="container mx-auto px-4 py-6 min-h-screen">
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-6">
+          <h1 className="text-2xl font-bold mb-1">Müşteriler</h1>
+          <p className="text-muted-foreground">Tüm müşterileri görüntüleyin ve yönetin</p>
         </div>
 
         {/* Search Bar */}
         <Card className="mb-6">
           <CardHeader>
-            <CardTitle>Search Customers</CardTitle>
+            <CardTitle className="font-semibold">Müşteri Arama</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="relative">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Search by name, email or phone..."
+                placeholder="İsim, e-posta veya telefon ile ara..."
                 className="pl-8"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -159,17 +82,17 @@ export default function Customers() {
         </Card>
 
         {/* Customers Table */}
-        <Card>
+        <Card className="mb-8">
           <CardContent className="p-0">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Customer</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Phone</TableHead>
+                  <TableHead>Müşteri</TableHead>
+                  <TableHead>E-posta</TableHead>
+                  <TableHead>Telefon</TableHead>
                   <TableHead>Aidat</TableHead>
-                  <TableHead>Aktif</TableHead>
-                  <TableHead>Actions</TableHead>
+                  <TableHead>Durum</TableHead>
+                  <TableHead>İşlemler</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -178,8 +101,8 @@ export default function Customers() {
                     <TableRow key={customer.id}>
                       <TableCell className="font-medium">
                         <div className="flex items-center gap-2">
-                          <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
-                            <User className="h-4 w-4 text-primary" />
+                          <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center">
+                            <User className="h-4 w-4" />
                           </div>
                           <span>
                             {customer.name} {customer.surname}
@@ -201,11 +124,11 @@ export default function Customers() {
                       <TableCell>
                         <div className="flex items-center gap-2">
                           {hasPaidDues(customer.id) ? (
-                            <span className="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                            <span className="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 hover:bg-green-100">
                               Ödendi
                             </span>
                           ) : (
-                            <span className="px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                            <span className="px-2 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-800 hover:bg-amber-100">
                               Ödenmedi
                             </span>
                           )}
@@ -214,11 +137,11 @@ export default function Customers() {
                       <TableCell>
                         <div className="flex items-center gap-2">
                           {isCustomerActive(customer.id) ? (
-                            <span className="px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                            <span className="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 hover:bg-green-100">
                               Aktif
                             </span>
                           ) : (
-                            <span className="px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                            <span className="px-2 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-800 hover:bg-amber-100">
                               Pasif
                             </span>
                           )}
@@ -232,7 +155,7 @@ export default function Customers() {
                           className="flex items-center gap-1"
                         >
                           <Link to={`/customers/${customer.id}`}>
-                            View History
+                            Detaylar
                             <ArrowRight className="h-4 w-4 ml-1" />
                           </Link>
                         </Button>
@@ -241,8 +164,8 @@ export default function Customers() {
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
-                      No customers found matching your search.
+                    <TableCell colSpan={6} className="h-24 text-center">
+                      Aramanızla eşleşen müşteri bulunamadı.
                     </TableCell>
                   </TableRow>
                 )}

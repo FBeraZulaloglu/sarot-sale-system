@@ -10,6 +10,7 @@ import Authentication from "./pages/Authentication";
 import ProjectDetails from "./pages/ProjectDetails";
 import SaleForm from "./pages/SaleForm";
 import SalesRecords from "./pages/SalesRecords";
+import SalesRecordsUpdated from "./pages/SalesRecordsUpdated";
 import CancellableSales from "./pages/CancellableSales";
 import CancelSale from "./pages/CancelSale";
 import NotFound from "./pages/NotFound";
@@ -35,6 +36,9 @@ const App = () => (
             <Route path="/projects/:projectId" element={<ProjectDetails />} />
             <Route path="/sales/new" element={<SaleForm />} />
             <Route path="/sales-records" element={<SalesRecords />} />
+            <Route path="/sales-records-updated" element={<SalesRecordsUpdated />} />
+            <Route path="/sales/:saleId" element={<SaleForm />} />
+            <Route path="/sales/:saleId/edit" element={<SaleForm />} />
             <Route path="/cancellable-sales" element={<CancellableSales />} />
             <Route path="/cancel-sale/:saleId" element={<CancelSale />} />
             <Route path="/customers" element={<Customers />} />

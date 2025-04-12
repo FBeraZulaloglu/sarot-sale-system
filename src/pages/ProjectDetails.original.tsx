@@ -11,6 +11,7 @@ import { DateRangeFilter } from "@/components/projects/DateRangeFilter";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { RoomTooltip } from "@/components/projects/RoomTooltip";
 import { useState, useEffect } from "react";
+import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 import { YoutubeVideoDialog } from "@/components/projects/YoutubeVideoDialog";
 import {
@@ -21,54 +22,8 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import { Link, useParams, useSearchParams } from "react-router-dom";
-
-// Mock project data
-const MOCK_PROJECTS: Project[] = [
-  // ... existing mock projects
-];
-
-// Helper function to generate mock rooms for a project
-function generateMockRooms(projectId: string, floorCount: number, houseId?: string): Room[] {
-  const rooms: Room[] = [];
-  const roomsPerFloor = 8;
-  
-  for (let floor = 1; floor <= floorCount; floor++) {
-    for (let i = 1; i <= roomsPerFloor; i++) {
-      const roomNumber = `${floor}${i.toString().padStart(2, '0')}`;
-      const id = `${projectId}-${roomNumber}`;
-      const price = 100000 + (floor * 10000) + (Math.random() * 50000);
-      
-      // Determine status based on some logic
-      let status: 'available' | 'reserved' | 'sold' = 'available';
-      const rand = Math.random();
-      if (rand < 0.2) {
-        status = 'reserved';
-      } else if (rand < 0.5) {
-        status = 'sold';
-      }
-      
-      rooms.push({
-        id,
-        projectId,
-        houseId: houseId || projectId, // Use houseId if provided
-        floor,
-        roomNumber,
-        price,
-        status,
-        type: Math.random() > 0.7 ? '2+1' : '1+1',
-        size: Math.floor(50 + (Math.random() * 50)),
-        balcony: Math.random() > 0.3,
-      });
-    }
-  }
-  
-  return rooms;
-}
-
-// Mock reservation data for date filtering
-const MOCK_RESERVATIONS = [
-  // ... existing mock reservations
-];
+import { MOCK_PROJECTS, MOCK_ROOMS } from "@/data/projects";
+import { MOCK_RESERVATIONS } from "@/data/reservations";
 
 export default function ProjectDetails() {
   const { projectId } = useParams<{ projectId: string }>();
@@ -78,6 +33,7 @@ export default function ProjectDetails() {
   const [activeTab, setActiveTab] = useState("overview");
   const [startDateFilter, setStartDateFilter] = useState<Date | undefined>(undefined);
   const [endDateFilter, setEndDateFilter] = useState<Date | undefined>(undefined);
+  const [seasonFilter, setSeasonFilter] = useState<string | undefined>(undefined);
   const [isVideoDialogOpen, setVideoDialogOpen] = useState(false);
   const [selectedFloor, setSelectedFloor] = useState<number>(1);
   const [selectedHouse, setSelectedHouse] = useState<House | null>(null);
@@ -93,8 +49,10 @@ export default function ProjectDetails() {
     }
   }, [houseId, project.houses]);
 
-  // Generate mock rooms for this project
-  const rooms = selectedHouse ? generateMockRooms(projectId, selectedHouse.floorCount, selectedHouse.id) : generateMockRooms(projectId, project.floorCount);
+  // Filter rooms for this project from the imported MOCK_ROOMS array
+  const rooms = selectedHouse
+    ? MOCK_ROOMS.filter(room => room.projectId === projectId && room.houseId === selectedHouse.id)
+    : MOCK_ROOMS.filter(room => room.projectId === projectId);
 
   // Function to check if a room is available between dates
   const isRoomAvailableBetweenDates = (roomId: string, startDate?: Date, endDate?: Date): boolean => {
@@ -183,13 +141,77 @@ export default function ProjectDetails() {
     return acc;
   }, {} as Record<number, number>);
 
-  const handleDateRangeFilter = (startDate: Date | undefined, endDate: Date | undefined) => {
+  const handleDateRangeFilter = (
+    startDate: Date | undefined, 
+    endDate: Date | undefined, 
+    season?: string,
+    roomCount?: string,
+    roomType?: string,
+    weekNumber?: string
+  ) => {
     setStartDateFilter(startDate);
     setEndDateFilter(endDate);
+    setSeasonFilter(season);
+    
+    // Apply filters to the rooms
+    const projectRooms = selectedHouse
+      ? MOCK_ROOMS.filter(room => room.projectId === projectId && room.houseId === selectedHouse.id)
+      : MOCK_ROOMS.filter(room => room.projectId === projectId);
+      
+    const filteredRooms = projectRooms.filter(room => {
+      // Filter by house if a house is selected
+      if (selectedHouse && room.houseId !== selectedHouse.id) {
+        return false;
+      }
+      
+      // Filter by date range if specified
+      if (startDate && endDate) {
+        // In a real app, we would check if the room is available during this date range
+        // For now, we'll just include all rooms when a date range is specified
+      }
+      
+      // Filter by season if specified
+      if (season) {
+        // In a real app, we would check if the room is available during this season
+        // For now, we'll just include all rooms when a season is specified
+      }
+      
+      // Filter by specific week if season and week are specified
+      if (season && weekNumber) {
+        // In a real app, we would check if the room is available during this specific week
+        // For now, we'll just include all rooms when a week is specified
+        // This would typically involve checking availability for specific dates
+        // corresponding to the selected week
+      }
+      
+      // Filter by room count if specified
+      if (roomCount) {
+        // In a real app, we would check the room's actual count/size
+        // For now, we'll just filter based on the room type which might include this info
+        if (room.type && !room.type.includes(roomCount)) {
+          return false;
+        }
+      }
+      
+      // Filter by room type if specified
+      if (roomType) {
+        // Check if the room matches the selected type
+        if (roomType === 'standart' && room.type !== 'Standart') return false;
+        if (roomType === 'premium' && room.type !== 'Premium') return false;
+        if (roomType === 'engelli' && room.type !== 'Engelli') return false;
+        if (roomType === 'king-suit' && room.type !== 'King Suit') return false;
+        if (roomType === 'suit' && room.type !== 'Suit') return false;
+      }
+      
+      return true;
+    });
+    
+    console.log(`Filters applied: ${startDate ? format(startDate, 'PP') : 'No start date'}, ${endDate ? format(endDate, 'PP') : 'No end date'}, Season: ${season || 'None'}, Week: ${weekNumber || 'None'}, Room Count: ${roomCount || 'Any'}, Room Type: ${roomType || 'Any'}`);
+    console.log(`Filtered rooms: ${filteredRooms.length}`);
   };
 
   return (
-    <MainLayout>
+    <MainLayout requireAuth={false}>
       <div className="space-y-6">
         {/* Back button */}
         <div className="container mx-auto px-4 py-6">
@@ -238,7 +260,7 @@ export default function ProjectDetails() {
                 )}
                 <p className="text-muted-foreground mb-4">{project.description}</p>
                 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-4">
                   <div className="flex items-center gap-2">
                     <Building2 className="h-4 w-4 text-muted-foreground" />
                     <div>
@@ -256,22 +278,64 @@ export default function ProjectDetails() {
                   </div>
                   
                   <div className="flex items-center gap-2">
-                    <Users className="h-4 w-4 text-muted-foreground" />
-                    <div>
-                      <p className="text-sm font-medium">
-                        {Math.floor((selectedHouse?.roomCount || project.roomCount) * 0.7)}
-                      </p>
-                      <p className="text-xs text-muted-foreground">Satılan Konutlar</p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center gap-2">
                     <Calendar className="h-4 w-4 text-muted-foreground" />
                     <div>
                       <p className="text-sm font-medium">
                         {new Date(project.createdAt).toLocaleDateString()}
                       </p>
                       <p className="text-xs text-muted-foreground">Başlangıç Tarihi</p>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Project Features Overview */}
+                <div className="grid grid-cols-3 gap-3 mb-4">
+                  <div className="p-2 bg-indigo-50 rounded-md border border-indigo-100">
+                    <div className="text-xs text-indigo-700 flex items-center gap-1 mb-1">
+                      <Building2 className="h-3.5 w-3.5" />
+                      <span>Property Details</span>
+                    </div>
+                    <div className="text-sm font-medium text-indigo-700">
+                      <div className="flex justify-between">
+                        <span>Total Units:</span>
+                        <span>{roomCounts.total}</span>
+                      </div>
+                      <div className="flex justify-between mt-1">
+                        <span>Floors:</span>
+                        <span>{selectedHouse ? selectedHouse.floorCount : project.floorCount}</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="p-2 bg-rose-50 rounded-md border border-rose-100">
+                    <div className="text-xs text-rose-700 flex items-center gap-1 mb-1">
+                      <Home className="h-3.5 w-3.5" />
+                      <span>Amenities</span>
+                    </div>
+                    <div className="text-sm font-medium text-rose-700">
+                      <div className="flex items-center gap-1">
+                        <span>• Thermal Spa</span>
+                      </div>
+                      <div className="flex items-center gap-1 mt-1">
+                        <span>• 24/7 Security</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="p-2 bg-emerald-50 rounded-md border border-emerald-100">
+                    <div className="text-xs text-emerald-700 flex items-center gap-1 mb-1">
+                      <Calendar className="h-3.5 w-3.5" />
+                      <span>Project Timeline</span>
+                    </div>
+                    <div className="text-sm font-medium text-emerald-700">
+                      <div className="flex justify-between">
+                        <span>Start Date:</span>
+                        <span>Jan 2023</span>
+                      </div>
+                      <div className="flex justify-between mt-1">
+                        <span>Completion:</span>
+                        <span>Dec 2025</span>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -289,49 +353,17 @@ export default function ProjectDetails() {
             </div>
           </div>
 
-          {/* House Selector for Multi-House Projects */}
-          {project.type === "multi" && project.houses && project.houses.length > 0 && (
-            <div className="mb-8">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Konut Tipleri</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
-                    {project.houses.map((house) => (
-                      <Button 
-                        key={house.id} 
-                        variant={selectedHouse?.id === house.id ? "default" : "outline"}
-                        className="w-full"
-                        onClick={() => setSelectedHouse(house)}
-                      >
-                        {house.name}
-                      </Button>
-                    ))}
-                    {selectedHouse && (
-                      <Button 
-                        variant="ghost" 
-                        className="w-full"
-                        onClick={() => setSelectedHouse(null)}
-                      >
-                        Tümünü Göster
-                      </Button>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          )}
+          {/* House selector section removed - this project only has 1+1 rooms */}
         </div>
         
         {/* Filter System */}
         <div className="mt-8">
           <Card>
             <CardHeader>
-              <CardTitle>Konut Arama</CardTitle>
+              <CardTitle>{selectedHouse ? `${selectedHouse.name} Oda Arama` : `${project.name} Konut Arama`}</CardTitle>
             </CardHeader>
             <CardContent>
-              <DateRangeFilter onDateRangeChange={handleDateRangeFilter} />
+              <DateRangeFilter onFilter={handleDateRangeFilter} />
             </CardContent>
           </Card>
         </div>
@@ -344,7 +376,7 @@ export default function ProjectDetails() {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Layers className="h-5 w-5" />
-                    Floor {selectedFloor} Information
+                    All Floors Information
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -354,28 +386,28 @@ export default function ProjectDetails() {
                         <Hotel className="h-4 w-4" />
                         Total Rooms
                       </div>
-                      <div className="text-2xl font-bold">{roomStatusByFloor[selectedFloor]?.total || 0}</div>
+                      <div className="text-2xl font-bold">{roomCounts.total}</div>
                     </div>
                     <div className="p-3 bg-green-50 rounded-md">
                       <div className="text-sm text-green-700 flex items-center gap-1">
                         <BedDouble className="h-4 w-4" />
                         Available
                       </div>
-                      <div className="text-2xl font-bold text-green-700">{roomStatusByFloor[selectedFloor]?.available || 0}</div>
+                      <div className="text-2xl font-bold text-green-700">{roomCounts.available}</div>
                     </div>
                     <div className="p-3 bg-amber-50 rounded-md">
                       <div className="text-sm text-amber-700 flex items-center gap-1">
                         <Calendar className="h-4 w-4" />
                         Reserved
                       </div>
-                      <div className="text-2xl font-bold text-amber-700">{roomStatusByFloor[selectedFloor]?.reserved || 0}</div>
+                      <div className="text-2xl font-bold text-amber-700">{roomCounts.reserved}</div>
                     </div>
                     <div className="p-3 bg-blue-50 rounded-md">
                       <div className="text-sm text-blue-700 flex items-center gap-1">
                         <DollarSign className="h-4 w-4" />
                         Sold
                       </div>
-                      <div className="text-2xl font-bold text-blue-700">{roomStatusByFloor[selectedFloor]?.sold || 0}</div>
+                      <div className="text-2xl font-bold text-blue-700">{roomCounts.sold}</div>
                     </div>
                   </div>
                 </CardContent>
@@ -383,10 +415,20 @@ export default function ProjectDetails() {
             </div>
             
             <div className="mb-3 grid grid-cols-2 md:grid-cols-4 gap-3">
-              {Array.from({ length: project.floorCount }, (_, i) => i + 1).map((floor) => {
+              {Array.from({ length: project.floorCount }, (_, i) => i).map((floor) => {
                 // Calculate percentage of available rooms for this floor
                 const availablePercentage = roomStatusByFloor[floor] ? 
                   (roomStatusByFloor[floor].available / roomStatusByFloor[floor].total) * 100 : 0;
+                
+                // Get floor name based on index
+                const getFloorName = (index) => {
+                  if (project.id === "2") { // For Sarot Termal Palace
+                    if (index === 0) return "0. Kat (Zemin)";
+                    if (index === 7) return "7. Kat (Çatı)";
+                    return `${index}. Kat`;
+                  }
+                  return `Floor ${index + 1}`;
+                };
                 
                 return (
                 <Card 
@@ -407,7 +449,7 @@ export default function ProjectDetails() {
                     
                     <div className="flex items-center gap-2 mb-1">
                       <Layers className="h-4 w-4" />
-                      <div className="text-sm font-medium">Floor {floor}</div>
+                      <div className="text-sm font-medium">{getFloorName(floor)}</div>
                     </div>
                     
                     <div className="flex items-center gap-2">
@@ -436,18 +478,22 @@ export default function ProjectDetails() {
           </div>
             
           {/* Rooms grid for each floor */}
-          {Array.from({ length: project.floorCount }, (_, i) => i + 1).map((floor) => (
+          {Array.from({ length: project.floorCount }, (_, i) => i).map((floor) => (
             <TabsContent key={floor} value={floor.toString()} className="space-y-4">
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Calendar className="h-5 w-5" />
-                    Floor {floor} - Rooms ({roomStatusByFloor[floor]?.available || 0} available)
+                    {project.id === "2" ? (
+                      floor === 0 ? "0. Kat (Zemin)" : 
+                      floor === 7 ? "7. Kat (Çatı)" : 
+                      `${floor}. Kat`
+                    ) : `Floor ${floor + 1}`} - Rooms ({roomStatusByFloor[floor]?.available || 0} available)
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   {roomsByFloor[floor]?.length ? (
-                    <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-4">
+                    <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-12 gap-3">
                       {roomsByFloor[floor]?.map((room) => {
                         // Determine status colors and styles
                         const statusConfig = {
@@ -535,15 +581,13 @@ export default function ProjectDetails() {
             </TabsContent>
           ))}
         </Tabs>
-      
-        {/* YouTube Video Dialog */}
-        <YoutubeVideoDialog
-          project={project}
-          open={isVideoDialogOpen}
-          onOpenChange={setVideoDialogOpen}
-          videoId={youtubeVideoId}
-        />
       </div>
+      <YoutubeVideoDialog
+        project={project}
+        open={isVideoDialogOpen}
+        onOpenChange={setVideoDialogOpen}
+        videoId={youtubeVideoId}
+      />
     </MainLayout>
   );
 }

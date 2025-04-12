@@ -25,14 +25,30 @@ interface DateRangeFilterProps {
     donem?: string | string[],
     donemType?: 'single' | 'multiple' | 'all'
   ) => void;
+  onFilterChange?: (filterInfo: {
+    selectedDonems: string[];
+    roomCount?: string;
+    roomType?: string;
+  }) => void;
 }
 
-export function DateRangeFilter({ onFilter }: DateRangeFilterProps) {
+export function DateRangeFilter({ onFilter, onFilterChange }: DateRangeFilterProps) {
   const [roomCount, setRoomCount] = useState<string | undefined>(undefined);
   const [roomType, setRoomType] = useState<string | undefined>(undefined);
   const [donemType, setDonemType] = useState<'single' | 'multiple' | 'all'>('multiple');
   const [selectedDonem, setSelectedDonem] = useState<string | undefined>(undefined);
   const [selectedDonems, setSelectedDonems] = useState<string[]>([]);
+
+  // Notify parent component when filters change
+  useEffect(() => {
+    if (onFilterChange) {
+      onFilterChange({
+        selectedDonems,
+        roomCount,
+        roomType
+      });
+    }
+  }, [selectedDonems, roomCount, roomType, onFilterChange]);
 
   const handleClear = () => {
     setRoomCount(undefined);

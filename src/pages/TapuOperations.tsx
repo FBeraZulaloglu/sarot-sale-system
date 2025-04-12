@@ -9,17 +9,17 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import { ArrowLeft, Save, Printer, FileText, List } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
-import { Customer, Project, Room, Tapu } from "@/types";
-import { MOCK_CUSTOMERS, MOCK_PROJECTS } from "@/components/customers/MockData";
-import { generateMockRooms } from "@/components/customers/MockDataGenerator";
+import { Customer, Project, Room, Tapu, Period, Season } from "@/types";
+import { MOCK_CUSTOMERS } from "@/data/customers";
+import { MOCK_PROJECTS } from "@/data/projects";
 import { toast } from "sonner";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { MOCK_SEASONS } from "@/data/seasons";
+import { getReservationsAsSales, generateAllRooms } from "@/data/salesRecordsFromReservations";
 
 // Generate mock tapu data for testing
 const generateMockTapuData = (): Tapu[] => {
-  const MOCK_ROOMS = MOCK_PROJECTS.flatMap(project => 
-    generateMockRooms(project.id, project.floorCount)
-  );
+  const MOCK_ROOMS = generateAllRooms();
   
   return Array.from({ length: 15 }, (_, i) => {
     const customerId = MOCK_CUSTOMERS[Math.floor(Math.random() * MOCK_CUSTOMERS.length)].id;
@@ -63,15 +63,37 @@ export default function TapuOperations() {
   const navigate = useNavigate();
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
+  
+  // Extract all query parameters from the URL
   const queryCustomerId = queryParams.get('customerId');
+  const querySaleId = queryParams.get('saleId');
+  const queryProjectId = queryParams.get('projectId');
+  const queryRoomId = queryParams.get('roomId');
+  const queryPeriodId = queryParams.get('periodId');
+  const querySeasonId = queryParams.get('seasonId');
+  const querySaleDate = queryParams.get('saleDate');
+  const queryHouseId = queryParams.get('houseId');
+  
+  // Check if we're coming from the sales records page
+  const isFromSalesRecords = querySaleId !== null;
   
   const isNewRecord = id === 'new';
   const isEditMode = !isNewRecord && !!id;
   
   // Generate all rooms for all projects
-  const MOCK_ROOMS = MOCK_PROJECTS.flatMap(project => 
-    generateMockRooms(project.id, project.floorCount)
-  );
+  const MOCK_ROOMS = generateAllRooms();
+  
+  // Debug log to see what parameters are being passed
+  console.log('URL Parameters:', {
+    queryCustomerId,
+    querySaleId,
+    queryProjectId,
+    queryRoomId,
+    queryPeriodId,
+    querySeasonId,
+    querySaleDate,
+    queryHouseId
+  });
   
   // Find existing tapu record if editing
   const existingTapu = isEditMode ? MOCK_TAPU_DATA.find(tapu => tapu.id === id) : null;
@@ -82,17 +104,103 @@ export default function TapuOperations() {
     : existingTapu 
       ? MOCK_CUSTOMERS.find(c => c.id === existingTapu.customerId)
       : null;
+      
+  // Find the project by ID from URL parameter or existing tapu record
+  const project = isNewRecord && queryProjectId
+    ? MOCK_PROJECTS.find(p => p.id === queryProjectId)
+    : existingTapu
+      ? MOCK_PROJECTS.find(p => p.id === existingTapu.projectId)
+      : null;
+      
+  // Find the room by ID from URL parameter or existing tapu record
+  const room = isNewRecord && queryRoomId
+    ? MOCK_ROOMS.find(r => r.id === queryRoomId)
+    : existingTapu
+      ? MOCK_ROOMS.find(r => r.id === existingTapu.roomId)
+      : null;
+      
+  // Debug log for room data
+  console.log('Room data:', {
+    queryRoomId,
+    foundRoom: room,
+    allRooms: MOCK_ROOMS.slice(0, 3) // Log first 3 rooms for debugging
+  });
   
+  // Find the house if available
+  const house = queryHouseId
+    ? project?.houses?.find(h => h.id === queryHouseId)
+    : room?.houseId !== room?.projectId
+      ? project?.houses?.find(h => h.id === room?.houseId)
+      : null;
+      
   // Get customer's associated projects
   const associatedProjects = customer ? 
     MOCK_PROJECTS.filter(p => customer.associatedProjectIds.includes(p.id)) : [];
   
   // State for form fields
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(customer);
-  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
-  const [selectedRoom, setSelectedRoom] = useState<Room | null>(null);
+  const [selectedProject, setSelectedProject] = useState<Project | null>(project);
+  const [selectedRoom, setSelectedRoom] = useState<Room | null>(room);
+  // Get period and season data from URL parameters
+  const [periodData, setPeriodData] = useState<Period | null>(null);
+  const [seasonData, setSeasonData] = useState<Season | null>(null);
+  
+  // Get sale records data
+  const salesRecords = getReservationsAsSales();
+  
+  // Fetch the complete sale record data when component mounts
+  useEffect(() => {
+    if (querySaleId) {
+      // Find the complete sale record from the Satışlar Yeni page
+      const saleRecord = salesRecords.find(sale => sale.id === querySaleId);
+      
+      if (saleRecord) {
+        console.log('Found sale record:', saleRecord);
+        
+        // Set all the data from the sale record
+        setSelectedCustomer(saleRecord.customer || null);
+        setSelectedProject(saleRecord.project || null);
+        
+        // Make sure we're getting the room data
+        if (saleRecord.room) {
+          console.log('Setting room from sale record:', saleRecord.room);
+          console.log('Room type from sale record:', saleRecord.room.type);
+          // Force the room type to be set if it's missing
+          const roomWithType = {
+            ...saleRecord.room,
+            type: saleRecord.room.type || (saleRecord.room.id.endsWith('0') ? '3+1' : saleRecord.room.id.endsWith('5') ? '2+1' : '1+1'),
+            size: saleRecord.room.size || 50 + (Number(saleRecord.room.id.slice(-1)) * 10)
+          };
+          setSelectedRoom(roomWithType);
+        } else if (queryRoomId) {
+          // If room not in sale record but we have roomId, try to find it directly
+          const roomFromId = MOCK_ROOMS.find(r => r.id === queryRoomId);
+          console.log('Setting room from query param:', roomFromId);
+          setSelectedRoom(roomFromId);
+        }
+        
+        // Set period and season data
+        if (saleRecord.period) {
+          setPeriodData(saleRecord.period);
+          setDonem(saleRecord.period.name);
+        }
+        
+        if (saleRecord.season) {
+          setSeasonData(saleRecord.season);
+        }
+      }
+    }
+  }, [querySaleId, queryRoomId, salesRecords]);
+  
+  // Debug useEffect to monitor selectedRoom changes
+  useEffect(() => {
+    console.log('selectedRoom changed:', selectedRoom);
+    console.log('Room type value:', selectedRoom?.type);
+  }, [selectedRoom]);
+  
+  // Initialize form fields with data from URL or existing tapu
   const [tapuNo, setTapuNo] = useState("");
-  const [tapuDate, setTapuDate] = useState("");
+  const [tapuDate, setTapuDate] = useState(querySaleDate ? new Date(querySaleDate).toISOString().split('T')[0] : "");
   const [donem, setDonem] = useState("");
   const [week, setWeek] = useState("");
   const [tapuBedeli, setTapuBedeli] = useState(0);
@@ -161,8 +269,8 @@ export default function TapuOperations() {
       // Update existing tapu record
       const updatedTapu: Tapu = {
         ...existingTapu,
-        projectId: selectedProject.id,
-        roomId: selectedRoom.id,
+        projectId: project?.id || selectedProject.id,
+        roomId: room?.id || selectedRoom.id,
         tapuNo,
         tapuDate,
         donem,
@@ -244,9 +352,9 @@ export default function TapuOperations() {
       <MainLayout>
         <div className="container mx-auto px-4 py-6">
           <Button variant="outline" asChild className="mb-6">
-            <Link to="/tapu-islemleri">
+            <Link to="/sales-records-updated">
               <ArrowLeft className="h-4 w-4 mr-2" />
-              Tapu Listesine Dön
+              Satışlara Geri Dön
             </Link>
           </Button>
           <Card>
@@ -271,217 +379,257 @@ export default function TapuOperations() {
           <div className="flex justify-between items-center mb-6">
             <div className="flex items-center">
               <Button variant="outline" asChild className="mr-4">
-                <Link to="/tapu-islemleri">
+                <Link to="/sales-records-updated">
                   <ArrowLeft className="h-4 w-4 mr-2" />
-                  Tapu Listesine Dön
+                  Satışlara Geri Dön
                 </Link>
               </Button>
-              <h1 className="text-2xl font-bold">{isEditMode ? 'Tapu Kaydını Düzenle' : 'Yeni Tapu Kaydı'}</h1>
             </div>
           </div>
+          
+          <div className="text-center mb-8">
+            <h1 className="text-3xl font-bold text-teal-800">{isEditMode ? 'Tapu Kaydını Düzenle' : 'Yeni Tapu Kaydı'}</h1>
+            <div className="w-24 h-1 bg-teal-500 mx-auto mt-2 rounded-full"></div>
+          </div>
 
-          <Card className="mb-6">
-            <CardHeader className="bg-amber-50 border-b border-amber-100">
-              <CardTitle className="text-amber-800">{isEditMode ? 'Tapu Kaydını Düzenle' : 'Yeni Tapu Kaydı'}</CardTitle>
+          {/* Section 1: Sale Information (Read-only) */}
+          <Card className="mb-6 shadow-sm">
+            <CardHeader className="bg-teal-50 border-b border-teal-100">
+              <CardTitle className="text-teal-800">Satış Bilgileri</CardTitle>
             </CardHeader>
             <CardContent className="pt-6">
-              {/* Customer Selection */}
-              {!customer && (
-                <div className="mb-6">
-                  <Label className="text-amber-900 mb-2 block">Müşteri Seçiniz:</Label>
-                  <Select 
-                    value={selectedCustomer?.id || ""} 
-                    onValueChange={(value) => {
-                      const customer = MOCK_CUSTOMERS.find(c => c.id === value);
-                      setSelectedCustomer(customer || null);
-                    }}
-                  >
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Müşteri seçiniz" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {MOCK_CUSTOMERS.map(customer => (
-                        <SelectItem key={customer.id} value={customer.id}>
-                          {customer.name} {customer.surname}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              )}
-              
               {/* Customer Information */}
-              {(customer || selectedCustomer) && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+              <div className="bg-teal-50 p-4 rounded-lg mb-6 shadow-sm">
+                <h3 className="text-lg font-semibold text-teal-800 mb-3">Müşteri Bilgileri</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <div className="mb-4">
-                      <Label className="text-amber-900">Referans:</Label>
-                      <Input 
-                        value={(customer || selectedCustomer)?.id || ""} 
-                        readOnly 
-                        className="bg-gray-100"
-                      />
-                    </div>
-                    
-                    <div className="mb-4">
-                      <Label className="text-amber-900">Adı Soyadı:</Label>
-                      <Input 
-                        value={`${(customer || selectedCustomer)?.name || ""} ${(customer || selectedCustomer)?.surname || ""}`} 
-                        readOnly 
-                        className="bg-gray-100"
-                      />
-                    </div>
+                    <Label className="text-teal-900 mb-1 block">Adı Soyadı:</Label>
+                    <Input 
+                      value={selectedCustomer ? `${selectedCustomer.name} ${selectedCustomer.surname}` : ""} 
+                      readOnly 
+                      className="bg-white border-teal-200"
+                    />
                   </div>
                   
                   <div>
-                    <div className="mb-4">
-                      <Label className="text-amber-900">E-posta:</Label>
-                      <Input 
-                        value={(customer || selectedCustomer)?.email || ""} 
-                        readOnly 
-                        className="bg-gray-100"
-                      />
-                    </div>
-                    
-                    <div className="mb-4">
-                      <Label className="text-amber-900">Telefon:</Label>
-                      <Input 
-                        value={(customer || selectedCustomer)?.phone || ""} 
-                        readOnly 
-                        className="bg-gray-100"
-                      />
-                    </div>
+                    <Label className="text-teal-900 mb-1 block">Telefon:</Label>
+                    <Input 
+                      value={selectedCustomer?.phone || ""} 
+                      readOnly 
+                      className="bg-white border-teal-200"
+                    />
                   </div>
-                </div>
-              )}
-              
-              {/* Project and Room Selection */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                <div>
-                  <Label className="text-amber-900 mb-2 block">Proje:</Label>
-                  <Select 
-                    value={selectedProject?.id || ""} 
-                    onValueChange={(value) => {
-                      const project = MOCK_PROJECTS.find(p => p.id === value);
-                      setSelectedProject(project || null);
-                      setSelectedRoom(null); // Reset room when project changes
-                    }}
-                  >
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Proje seçiniz" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {associatedProjects.length > 0 ? (
-                        associatedProjects.map(project => (
-                          <SelectItem key={project.id} value={project.id}>
-                            {project.name}
-                          </SelectItem>
-                        ))
-                      ) : (
-                        MOCK_PROJECTS.map(project => (
-                          <SelectItem key={project.id} value={project.id}>
-                            {project.name}
-                          </SelectItem>
-                        ))
-                      )}
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div>
-                  <Label className="text-amber-900 mb-2 block">Daire:</Label>
-                  <Select 
-                    value={selectedRoom?.id || ""} 
-                    onValueChange={(value) => {
-                      const room = availableRooms.find(r => r.id === value);
-                      setSelectedRoom(room || null);
-                    }}
-                    disabled={!selectedProject}
-                  >
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Daire seçiniz" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {availableRooms.map(room => (
-                        <SelectItem key={room.id} value={room.id}>
-                          {room.floor}. Kat - {room.roomNumber}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  
+                  <div>
+                    <Label className="text-teal-900 mb-1 block">E-posta:</Label>
+                    <Input 
+                      value={selectedCustomer?.email || ""} 
+                      readOnly 
+                      className="bg-white border-teal-200"
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label className="text-teal-900 mb-1 block">Referans No:</Label>
+                    <Input 
+                      value={selectedCustomer?.id || ""} 
+                      readOnly 
+                      className="bg-white border-teal-200"
+                    />
+                  </div>
                 </div>
               </div>
               
+              {/* Project and Room Information (Read-only) */}
+              <div className="bg-teal-50 p-4 rounded-lg mb-6 shadow-sm">
+                <h3 className="text-lg font-semibold text-teal-800 mb-3">Proje ve Daire Bilgileri</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-teal-900 mb-1 block">Proje Adı:</Label>
+                    <Input 
+                      value={selectedProject?.name || ""} 
+                      readOnly 
+                      className="bg-white border-teal-200"
+                    />
+                  </div>
+                  
+                  {house && (
+                    <div>
+                      <Label className="text-teal-900 mb-1 block">Bina:</Label>
+                      <Input 
+                        value={house.name} 
+                        readOnly 
+                        className="bg-white border-teal-200"
+                      />
+                    </div>
+                  )}
+                  
+                  <div>
+                    <Label className="text-teal-900 mb-1 block">Daire:</Label>
+                    <Input 
+                      value={selectedRoom ? `${selectedRoom.floorName || `${selectedRoom.floor}. Kat`} - ${selectedRoom.roomNumber} Nolu Daire` : ""} 
+                      readOnly 
+                      className="bg-white border-teal-200"
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label className="text-teal-900 mb-1 block">Daire Tipi:</Label>
+                    <Input 
+                      value={selectedRoom?.type || (selectedRoom ? (selectedRoom.id.endsWith('0') ? '3+1' : selectedRoom.id.endsWith('5') ? '2+1' : '1+1') : "")} 
+                      readOnly 
+                      className="bg-white border-teal-200"
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label className="text-teal-900 mb-1 block">Oda Numarası:</Label>
+                    <Input 
+                      value={selectedRoom?.roomNumber || ""} 
+                      readOnly 
+                      className="bg-white border-teal-200"
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label className="text-teal-900 mb-1 block">Metrekare:</Label>
+                    <Input 
+                      value={selectedRoom?.size ? `${selectedRoom.size} m²` : (selectedRoom ? `${50 + (Number(selectedRoom.id.slice(-1)) * 10)} m²` : "")} 
+                      readOnly 
+                      className="bg-white border-teal-200"
+                    />
+                  </div>
+                </div>
+              </div>
+              
+              {/* Dönem Information */}
+              <div className="bg-teal-50 p-4 rounded-lg mb-6 shadow-sm">
+                <h3 className="text-lg font-semibold text-teal-800 mb-3">Dönem Bilgileri</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-teal-900 mb-1 block">Dönem:</Label>
+                    <Input 
+                      value={donem} 
+                      readOnly 
+                      className="bg-white border-teal-200"
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label className="text-teal-900 mb-1 block">Dönem Tarihi:</Label>
+                    <Input 
+                      value={tapuDate} 
+                      readOnly 
+                      className="bg-white border-teal-200"
+                    />
+                  </div>
+                  
+                  {seasonData && (
+                    <div>
+                      <Label className="text-teal-900 mb-1 block">Sezon:</Label>
+                      <Input 
+                        value={seasonData.name} 
+                        readOnly 
+                        className="bg-white border-teal-200"
+                      />
+                    </div>
+                  )}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          
+          {/* Section 2: Tapu Information (Editable) */}
+          <Card className="mb-6 shadow-sm">
+            <CardHeader className="bg-teal-50 border-b border-teal-100">
+              <CardTitle className="text-teal-800">Tapu Bilgileri</CardTitle>
+            </CardHeader>
+            <CardContent className="pt-6">
               {/* Tapu Information */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                 <div>
-                  <Label className="text-amber-900 mb-2 block">Tapu No:</Label>
+                  <Label className="text-teal-900 mb-2 block">Tapu Bilgisi:</Label>
                   <Input 
                     value={tapuNo} 
                     onChange={(e) => setTapuNo(e.target.value)}
-                    placeholder="Tapu numarası giriniz"
+                    placeholder="Tapu bilgisi giriniz"
+                    className="border-teal-200"
                   />
                 </div>
                 
                 <div>
-                  <Label className="text-amber-900 mb-2 block">Tapu Tarihi:</Label>
+                  <Label className="text-teal-900 mb-2 block">Tapu İsmi:</Label>
                   <Input 
-                    type="date" 
                     value={tapuDate} 
                     onChange={(e) => setTapuDate(e.target.value)}
+                    className="border-teal-200"
+                    placeholder="Tapu ismi giriniz"
                   />
                 </div>
               </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                <div>
-                  <Label className="text-amber-900 mb-2 block">Dönem:</Label>
-                  <Input 
-                    value={donem} 
-                    onChange={(e) => setDonem(e.target.value)}
-                    placeholder="Örn: 2023Q1"
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div className="flex items-center gap-2">
+                  <Checkbox 
+                    id="alacaklarTemlikSozlesmesi" 
+                    checked={alacaklarTemlikSozlesmesi}
+                    onCheckedChange={(checked) => setAlacaklarTemlikSozlesmesi(checked === true)}
                   />
+                  <Label htmlFor="alacaklarTemlikSozlesmesi" className="text-teal-900">Alacağın Temliki Sözleşmesi</Label>
                 </div>
                 
-                <div>
-                  <Label className="text-amber-900 mb-2 block">Hafta:</Label>
-                  <Input 
-                    value={week} 
-                    onChange={(e) => setWeek(e.target.value)}
-                    placeholder="Örn: 12"
+                <div className="flex items-center gap-2">
+                  <Checkbox 
+                    id="odemeninTamamlandiginaDairBelge" 
+                    checked={odemeninTamamlandiginaDairBelge}
+                    onCheckedChange={(checked) => setOdemeninTamamlandiginaDairBelge(checked === true)}
                   />
+                  <Label htmlFor="odemeninTamamlandiginaDairBelge" className="text-teal-900">Ödemenin Tamamlandığına Dair Belge</Label>
                 </div>
-                
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                 <div>
-                  <Label className="text-amber-900 mb-2 block">Tapu Bedeli:</Label>
+                  <Label className="text-teal-900 mb-2 block">Tapu Bedeli:</Label>
                   <Input 
                     type="number" 
                     value={tapuBedeli} 
                     onChange={(e) => setTapuBedeli(Number(e.target.value))}
                     placeholder="Tapu bedeli giriniz"
+                    className="border-teal-200"
                   />
+                </div>
+                
+                <div className="flex items-center gap-2">
+                  <Checkbox 
+                    id="tapuMasrafi" 
+                    checked={tapuMasrafi}
+                    onCheckedChange={(checked) => setTapuMasrafi(checked === true)}
+                  />
+                  <Label htmlFor="tapuMasrafi" className="text-teal-900">Tapu Masrafı</Label>
                 </div>
               </div>
               
               {/* Mortgage Information */}
-              <div className="mb-6">
-                <div className="flex items-center mb-4 gap-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div className="flex items-center gap-2">
                   <Checkbox 
                     id="ipotekli" 
                     checked={ipotekli}
                     onCheckedChange={(checked) => setIpotekli(checked === true)}
                   />
-                  <Label htmlFor="ipotekli" className="text-amber-900">İpotekli</Label>
+                  <Label htmlFor="ipotekli" className="text-teal-900">İpotekli</Label>
                 </div>
                 
                 {ipotekli && (
-                  <div className="pl-6">
-                    <Label className="text-amber-900 mb-2 block">İpotek Bedeli:</Label>
+                  <div>
+                    <Label className="text-teal-900 mb-2 block">İpotek Bedeli:</Label>
                     <Input 
                       type="number" 
                       value={ipotekBedeli} 
                       onChange={(e) => setIpotekBedeli(Number(e.target.value))}
                       placeholder="İpotek bedeli giriniz"
+                      className="border-teal-200"
                     />
                   </div>
                 )}
@@ -490,27 +638,7 @@ export default function TapuOperations() {
               <Separator className="my-6" />
               
               {/* Document Status Checkboxes */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <div className="flex items-center mb-4 gap-2">
-                    <Checkbox 
-                      id="alacaklarTemlikSozlesmesi" 
-                      checked={alacaklarTemlikSozlesmesi}
-                      onCheckedChange={(checked) => setAlacaklarTemlikSozlesmesi(checked === true)}
-                    />
-                    <Label htmlFor="alacaklarTemlikSozlesmesi" className="text-amber-900">Alacaklar Temlik Sözleşmesi</Label>
-                  </div>
-                  
-                  <div className="flex items-center mb-4 gap-2">
-                    <Checkbox 
-                      id="odemeninTamamlandiginaDairBelge" 
-                      checked={odemeninTamamlandiginaDairBelge}
-                      onCheckedChange={(checked) => setOdemeninTamamlandiginaDairBelge(checked === true)}
-                    />
-                    <Label htmlFor="odemeninTamamlandiginaDairBelge" className="text-amber-900">Ödemenin Tamamlandığına Dair Belge</Label>
-                  </div>
-                </div>
-                
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                 <div>
                   <div className="flex items-center mb-4 gap-2">
                     <Checkbox 
@@ -518,7 +646,7 @@ export default function TapuOperations() {
                       checked={fotografliVekaletname}
                       onCheckedChange={(checked) => setFotografliVekaletname(checked === true)}
                     />
-                    <Label htmlFor="fotografliVekaletname" className="text-amber-900">Fotoğraflı Vekaletname</Label>
+                    <Label htmlFor="fotografliVekaletname" className="text-teal-900">Fotoğraflı vekaletname Nüfus Kağıdı Fotokopisi</Label>
                   </div>
                   
                   <div className="flex items-center mb-4 gap-2">
@@ -527,34 +655,7 @@ export default function TapuOperations() {
                       checked={sozlesmeVeEkleriGerilAlindi}
                       onCheckedChange={(checked) => setSozlesmeVeEkleriGerilAlindi(checked === true)}
                     />
-                    <Label htmlFor="sozlesmeVeEkleriGerilAlindi" className="text-amber-900">Sözleşme ve Ekleri Geri Alındı</Label>
-                  </div>
-                  
-                  <div className="flex items-center mb-4 gap-2">
-                    <Checkbox 
-                      id="tapuMasrafi" 
-                      checked={tapuMasrafi}
-                      onCheckedChange={(checked) => setTapuMasrafi(checked === true)}
-                    />
-                    <Label htmlFor="tapuMasrafi" className="text-amber-900">Tapu Masrafı</Label>
-                  </div>
-                  
-                  <div className="flex items-center mb-4 gap-2">
-                    <Checkbox 
-                      id="tapuVerildi" 
-                      checked={tapuVerildi}
-                      onCheckedChange={(checked) => setTapuVerildi(checked === true)}
-                    />
-                    <Label htmlFor="tapuVerildi" className="text-amber-900">Tapu Verildi</Label>
-                  </div>
-                  
-                  <div className="flex items-center mb-4 gap-2">
-                    <Checkbox 
-                      id="faturaKesildi" 
-                      checked={faturaKesildi}
-                      onCheckedChange={(checked) => setFaturaKesildi(checked === true)}
-                    />
-                    <Label htmlFor="faturaKesildi" className="text-amber-900">Fatura Kesildi</Label>
+                    <Label htmlFor="sozlesmeVeEkleriGerilAlindi" className="text-teal-900">Sözleşme ve Ekleri Geri Alındı mı?</Label>
                   </div>
                   
                   <div className="flex items-center mb-4 gap-2">
@@ -563,18 +664,38 @@ export default function TapuOperations() {
                       checked={onay}
                       onCheckedChange={(checked) => setOnay(checked === true)}
                     />
-                    <Label htmlFor="onay" className="text-amber-900">Onay</Label>
+                    <Label htmlFor="onay" className="text-teal-900">Onay</Label>
+                  </div>
+                </div>
+                
+                <div>
+                  <div className="flex items-center mb-4 gap-2">
+                    <Checkbox 
+                      id="tapuVerildi" 
+                      checked={tapuVerildi}
+                      onCheckedChange={(checked) => setTapuVerildi(checked === true)}
+                    />
+                    <Label htmlFor="tapuVerildi" className="text-teal-900">Tapu Verildi mi?</Label>
+                  </div>
+                  
+                  <div className="flex items-center mb-4 gap-2">
+                    <Checkbox 
+                      id="faturaKesildi" 
+                      checked={faturaKesildi}
+                      onCheckedChange={(checked) => setFaturaKesildi(checked === true)}
+                    />
+                    <Label htmlFor="faturaKesildi" className="text-teal-900">Fatura Kesildi mi?</Label>
                   </div>
                 </div>
               </div>
               
               {/* Notes */}
               <div className="mb-4">
-                <Label className="text-amber-900 mb-2 block">Açıklama:</Label>
+                <Label className="text-teal-900 mb-2 block">Açıklama:</Label>
                 <Textarea 
                   value={aciklama}
                   onChange={(e) => setAciklama(e.target.value)}
-                  className="min-h-[150px]"
+                  className="min-h-[150px] border-teal-200"
                   placeholder="Tapu işlemi ile ilgili notlar..."
                 />
               </div>
@@ -586,7 +707,7 @@ export default function TapuOperations() {
               Formu Temizle
             </Button>
             
-            <Button type="submit" className="bg-amber-600 hover:bg-amber-700 text-white">
+            <Button type="submit" variant="success">
               <Save className="h-4 w-4 mr-2" />
               {isEditMode ? 'Güncelle' : 'Kaydet'}
             </Button>
@@ -597,9 +718,9 @@ export default function TapuOperations() {
             </Button>
             
             <Button type="button" variant="outline" asChild>
-              <Link to="/tapu-islemleri">
+              <Link to={isFromSalesRecords ? "/sales-records-updated" : "/tapu-islemleri"}>
                 <List className="h-4 w-4 mr-2" />
-                Tapu Kayıtları
+                {isFromSalesRecords ? "Önceki Sayfa" : "Tapu Listesi"}
               </Link>
             </Button>
           </div>

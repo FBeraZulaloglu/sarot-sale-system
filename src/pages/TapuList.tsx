@@ -7,15 +7,14 @@ import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { FileText, Plus, Search, Eye } from "lucide-react";
-import { MOCK_CUSTOMERS, MOCK_PROJECTS } from "@/components/customers/MockData";
 import { Tapu, Customer, Project, Room } from "@/types";
-import { generateMockRooms } from "@/components/customers/MockDataGenerator";
+import { MOCK_CUSTOMERS } from "@/data/customers";
+import { MOCK_PROJECTS } from "@/data/projects";
+import { generateAllRooms } from "@/data/salesRecordsFromReservations";
 
 // Generate mock tapu data
 const generateMockTapuData = (): Tapu[] => {
-  const MOCK_ROOMS = MOCK_PROJECTS.flatMap(project => 
-    generateMockRooms(project.id, project.floorCount)
-  );
+  const MOCK_ROOMS = generateAllRooms();
   
   // Generate more tapu records (30) to better demonstrate the functionality
   return Array.from({ length: 30 }, (_, i) => {
@@ -99,9 +98,7 @@ const getProjectName = (projectId: string): string => {
 
 // Helper function to get room name
 const getRoomName = (projectId: string, roomId: string): string => {
-  const MOCK_ROOMS = MOCK_PROJECTS.flatMap(project => 
-    generateMockRooms(project.id, project.floorCount)
-  );
+  const MOCK_ROOMS = generateAllRooms();
   
   const room = MOCK_ROOMS.find(r => r.id === roomId && r.projectId === projectId);
   return room ? `${room.floor}. Kat - ${room.roomNumber}` : 'Unknown Room';
@@ -152,11 +149,6 @@ export default function TapuList() {
             <h1 className="text-2xl font-bold mb-1">Tapu İşlemleri</h1>
             <p className="text-muted-foreground">Tüm tapu kayıtlarını görüntüleyin ve yönetin</p>
           </div>
-          
-          <Button onClick={() => navigate("/tapu-islemleri/new")} className="mt-4 md:mt-0 bg-amber-600 hover:bg-amber-700">
-            <Plus className="h-4 w-4 mr-2" />
-            Yeni Tapu Kaydı
-          </Button>
         </div>
         
         <Card className="mb-8">

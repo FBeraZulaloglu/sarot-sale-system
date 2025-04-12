@@ -46,24 +46,24 @@ export function CustomerNotes({ customerId, customerName }: CustomerNotesProps) 
       customerId,
       date: new Date().toISOString(),
       time: "10:30",
-      staffName: "John Smith",
-      content: "Customer called about room availability in the Luxury Grand Hotel project.",
+      staffName: "Ahmet Yılmaz",
+      content: "Müşteri Sarot Grand Resort projesindeki oda müsaitliği hakkında aradı.",
     },
     {
       id: "2",
       customerId,
       date: new Date(Date.now() - 86400000).toISOString(), // Yesterday
       time: "14:15",
-      staffName: "Sarah Johnson",
-      content: "Follow-up meeting scheduled for next week to discuss financing options.",
+      staffName: "Zeynep Kaya",
+      content: "Finansman seçeneklerini görüşmek için önümüzdeki hafta takip toplantısı planlandı.",
     },
     {
       id: "3",
       customerId,
       date: new Date(Date.now() - 86400000 * 3).toISOString(), // 3 days ago
       time: "11:45",
-      staffName: "David Wilson",
-      content: "Customer requested additional information about the amenities offered at the Seaside Resort.",
+      staffName: "Mehmet Çelik",
+      content: "Müşteri Sarot Termal tesisindeki olanaklar hakkında ek bilgi talep etti.",
     },
   ]);
 
@@ -77,7 +77,7 @@ export function CustomerNotes({ customerId, customerName }: CustomerNotesProps) 
   // Handle form submission
   const onSubmit = (values: NoteFormValues) => {
     if (!values.content.trim()) {
-      toast.error("Note content cannot be empty.");
+      toast.error("Not içeriği boş olamaz.");
       return;
     }
 
@@ -87,80 +87,80 @@ export function CustomerNotes({ customerId, customerName }: CustomerNotesProps) 
       customerId,
       date: now.toISOString(),
       time: format(now, "HH:mm"),
-      staffName: "Current User", // In a real app, this would be the logged-in user
+      staffName: "Mevcut Kullanıcı", // In a real app, this would be the logged-in user
       content: values.content,
     };
 
     setNotes([newNote, ...notes]);
     form.reset();
-    toast.success("Customer note added successfully");
+    toast.success("Müşteri notu başarıyla eklendi");
   };
 
   return (
     <div className="space-y-6">
       {/* Customer Notes History */}
-      <Card>
-        <CardHeader className="bg-blue-900/80 text-white">
-          <CardTitle className="text-white">Customer Interaction History</CardTitle>
+      <Card className="border-blue-200 shadow-md">
+        <CardHeader className="bg-blue-50 dark:bg-blue-900/20">
+          <CardTitle className="text-blue-900 dark:text-blue-100">Müşteri Etkileşim Geçmişi</CardTitle>
         </CardHeader>
         <CardContent className="p-0">
           {notes.length > 0 ? (
-            <div className="divide-y divide-gray-200">
+            <div className="divide-y divide-blue-100">
               {notes.map((note) => (
-                <div key={note.id} className="p-4 hover:bg-amber-50">
+                <div key={note.id} className="p-4 hover:bg-blue-50 dark:hover:bg-blue-900/10">
                   <div className="grid grid-cols-12 gap-2">
-                    <div className="col-span-2 font-medium text-gray-700">
+                    <div className="col-span-2 font-medium text-blue-900 dark:text-blue-300">
                       {format(new Date(note.date), "dd.MM.yyyy")}
                     </div>
-                    <div className="col-span-1 text-gray-600">{note.time}</div>
-                    <div className="col-span-2 text-gray-800">{note.staffName}</div>
-                    <div className="col-span-3 font-medium">{customerName}</div>
-                    <div className="col-span-4 text-gray-700">{note.content}</div>
+                    <div className="col-span-1 text-blue-700 dark:text-blue-400">{note.time}</div>
+                    <div className="col-span-2 text-blue-800 dark:text-blue-300">{note.staffName}</div>
+                    <div className="col-span-3 font-medium text-blue-900 dark:text-blue-200">{customerName}</div>
+                    <div className="col-span-4 text-blue-700 dark:text-blue-400">{note.content}</div>
                   </div>
                 </div>
               ))}
             </div>
           ) : (
-            <div className="py-8 text-center text-gray-500">No interaction history available.</div>
+            <div className="py-8 text-center text-blue-600/70 dark:text-blue-400/70">Etkileşim geçmişi bulunamadı.</div>
           )}
         </CardContent>
       </Card>
 
       {/* Add New Note */}
-      <Card>
-        <CardHeader className="bg-blue-900/80 text-white">
-          <CardTitle className="text-white">Add Customer Note</CardTitle>
+      <Card className="border-blue-200 shadow-md">
+        <CardHeader className="bg-blue-50 dark:bg-blue-900/20">
+          <CardTitle className="text-blue-900 dark:text-blue-100">Müşteri Notu Ekle</CardTitle>
         </CardHeader>
         <CardContent className="pt-6">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <FormLabel className="text-amber-900">Reference #</FormLabel>
-                  <Input disabled value={customerId} className="bg-gray-100" />
+                  <FormLabel className="text-blue-900">Referans #</FormLabel>
+                  <Input disabled value={customerId} className="bg-blue-50 border-blue-200" />
                 </div>
                 <div>
-                  <FormLabel className="text-amber-900">Date/Time</FormLabel>
+                  <FormLabel className="text-blue-900">Tarih/Saat</FormLabel>
                   <Input 
                     disabled 
                     value={format(new Date(), "dd/MM/yyyy HH:mm")} 
-                    className="bg-gray-100" 
+                    className="bg-blue-50 border-blue-200" 
                   />
                 </div>
                 <div>
-                  <FormLabel className="text-amber-900">Staff</FormLabel>
+                  <FormLabel className="text-blue-900">Personel</FormLabel>
                   <Input 
                     disabled 
-                    value="Current User" 
-                    className="bg-gray-100" 
+                    value="Mevcut Kullanıcı" 
+                    className="bg-blue-50 border-blue-200" 
                   />
                 </div>
                 <div>
-                  <FormLabel className="text-amber-900">Customer</FormLabel>
+                  <FormLabel className="text-blue-900">Müşteri</FormLabel>
                   <Input 
                     disabled 
                     value={customerName} 
-                    className="bg-gray-100" 
+                    className="bg-blue-50 border-blue-200" 
                   />
                 </div>
               </div>
@@ -172,11 +172,11 @@ export function CustomerNotes({ customerId, customerName }: CustomerNotesProps) 
                 name="content"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-amber-900">Note Content</FormLabel>
+                    <FormLabel className="text-blue-900">Not İçeriği</FormLabel>
                     <FormControl>
                       <Textarea 
-                        placeholder="Enter customer interaction details..." 
-                        className="min-h-[100px]" 
+                        placeholder="Müşteri etkileşim detaylarını girin..." 
+                        className="min-h-[100px] border-blue-200 focus-visible:ring-blue-400" 
                         {...field} 
                       />
                     </FormControl>
@@ -188,15 +188,16 @@ export function CustomerNotes({ customerId, customerName }: CustomerNotesProps) 
                 <Button 
                   type="button" 
                   variant="outline" 
+                  className="border-blue-300 hover:bg-blue-50 text-blue-800"
                   onClick={() => form.reset()}
                 >
-                  Cancel
+                  İptal
                 </Button>
                 <Button 
                   type="submit" 
-                  className="bg-amber-600 hover:bg-amber-700 text-white"
+                  className="bg-blue-600 hover:bg-blue-700 text-white"
                 >
-                  Add Note
+                  Not Ekle
                 </Button>
               </div>
             </form>

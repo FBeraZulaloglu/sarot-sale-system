@@ -16,140 +16,9 @@ import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { useState } from "react";
 import { ProjectModel3DDialog } from "@/components/projects/ProjectModel3DDialog";
 import { YoutubeVideoDialog } from "@/components/projects/YoutubeVideoDialog";
+import { MOCK_PROJECTS } from "@/data/projects";
 
-// Mock data for demonstration
-const MOCK_PROJECTS: Project[] = [
-  {
-    id: "1",
-    name: "Burj Al Babas",
-    description: "Iconic castle-style luxury villas with stunning architecture and premium amenities.",
-    roomCount: 732,
-    floorCount: 3,
-    imageUrl: "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=2070&auto=format&fit=crop",
-    image3dUrl: "https://images.unsplash.com/photo-1582719508461-905c673771fd?q=80&w=1925&auto=format&fit=crop",
-    createdAt: new Date().toISOString(),
-    type: "single",
-  },
-  {
-    id: "2",
-    name: "Sarot Palace",
-    description: "Luxurious palace-inspired residences with elegant design and exclusive amenities.",
-    roomCount: 120,
-    floorCount: 4,
-    imageUrl: "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?q=80&w=2070&auto=format&fit=crop",
-    image3dUrl: "https://images.unsplash.com/photo-1540541338287-41700207dee6?q=80&w=2070&auto=format&fit=crop",
-    createdAt: new Date().toISOString(),
-    type: "single",
-  },
-  {
-    id: "3",
-    name: "Sarot Grand Resort & Spa",
-    description: "Five-star luxury resort with world-class spa, multiple restaurants, and breathtaking mountain views.",
-    roomCount: 200,
-    floorCount: 8,
-    imageUrl: "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?q=80&w=2070&auto=format&fit=crop",
-    image3dUrl: "https://images.unsplash.com/photo-1571896349842-33c89424de2d?q=80&w=1780&auto=format&fit=crop",
-    createdAt: new Date().toISOString(),
-    type: "hotel",
-    houses: [
-      { id: "3-1", name: "Deluxe Oda", projectId: "3", floorCount: 1, roomCount: 80 },
-      { id: "3-2", name: "Suite Oda", projectId: "3", floorCount: 1, roomCount: 60 },
-      { id: "3-3", name: "Kral Dairesi", projectId: "3", floorCount: 1, roomCount: 40 },
-      { id: "3-4", name: "Termal Oda", projectId: "3", floorCount: 1, roomCount: 20 }
-    ],
-    images: [
-      "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?q=80&w=2070&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1571896349842-33c89424de2d?q=80&w=1780&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?q=80&w=2070&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1564501049412-61c2a3083791?q=80&w=1932&auto=format&fit=crop"
-    ],
-    videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
-  },
-  {
-    id: "4",
-    name: "Sarot Boutique Hotel & Termal",
-    description: "Intimate boutique hotel offering personalized service, thermal facilities, and elegant accommodations in the heart of nature.",
-    roomCount: 60,
-    floorCount: 5,
-    imageUrl: "https://images.unsplash.com/photo-1564501049412-61c2a3083791?q=80&w=1932&auto=format&fit=crop",
-    image3dUrl: "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?q=80&w=2070&auto=format&fit=crop",
-    createdAt: new Date().toISOString(),
-    type: "hotel",
-    houses: [
-      { id: "4-1", name: "Standart Oda", projectId: "4", floorCount: 1, roomCount: 30 },
-      { id: "4-2", name: "Deluxe Oda", projectId: "4", floorCount: 1, roomCount: 20 },
-      { id: "4-3", name: "Suite Oda", projectId: "4", floorCount: 1, roomCount: 10 }
-    ],
-    images: [
-      "https://images.unsplash.com/photo-1564501049412-61c2a3083791?q=80&w=1932&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?q=80&w=2070&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?q=80&w=2070&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=2070&auto=format&fit=crop"
-    ],
-    videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
-  },
-  {
-    id: "5",
-    name: "Sarot Teras Evler",
-    description: "Modern terraced homes with panoramic views and contemporary design.",
-    roomCount: 180,
-    floorCount: 3,
-    imageUrl: "https://images.unsplash.com/photo-1529551739587-e242c564f727?q=80&w=2046&auto=format&fit=crop",
-    image3dUrl: "https://images.unsplash.com/photo-1564501049412-61c2a3083791?q=80&w=2064&auto=format&fit=crop",
-    createdAt: new Date().toISOString(),
-    type: "multi",
-    houses: [
-      { id: "5-1", name: "Fulya", projectId: "5", floorCount: 3, roomCount: 12 },
-      { id: "5-2", name: "Sümbül", projectId: "5", floorCount: 3, roomCount: 12 },
-      { id: "5-3", name: "Sekoya", projectId: "5", floorCount: 3, roomCount: 12 },
-      { id: "5-4", name: "Nergis", projectId: "5", floorCount: 3, roomCount: 12 },
-      { id: "5-5", name: "Frezya", projectId: "5", floorCount: 3, roomCount: 12 },
-      { id: "5-6", name: "Kamelya", projectId: "5", floorCount: 3, roomCount: 12 },
-      { id: "5-7", name: "Sedir", projectId: "5", floorCount: 3, roomCount: 12 },
-      { id: "5-8", name: "Safran", projectId: "5", floorCount: 3, roomCount: 12 },
-      { id: "5-9", name: "Kardelen", projectId: "5", floorCount: 3, roomCount: 12 },
-      { id: "5-10", name: "Laden", projectId: "5", floorCount: 3, roomCount: 12 },
-      { id: "5-11", name: "Karanfil", projectId: "5", floorCount: 3, roomCount: 12 },
-      { id: "5-12", name: "Papatya", projectId: "5", floorCount: 3, roomCount: 12 },
-      { id: "5-13", name: "Sardunya", projectId: "5", floorCount: 3, roomCount: 12 },
-      { id: "5-14", name: "Lilyum", projectId: "5", floorCount: 3, roomCount: 12 },
-      { id: "5-15", name: "Arguvan", projectId: "5", floorCount: 3, roomCount: 12 },
-    ],
-  },
-  {
-    id: "6",
-    name: "Sarot Bahçe Evleri",
-    description: "Garden homes with lush green spaces and family-friendly environments.",
-    roomCount: 150,
-    floorCount: 2,
-    imageUrl: "https://images.unsplash.com/photo-1596436889106-be35e843f974?q=80&w=2070&auto=format&fit=crop",
-    image3dUrl: "https://images.unsplash.com/photo-1540555700478-4be289fbecef?q=80&w=2070&auto=format&fit=crop",
-    createdAt: new Date().toISOString(),
-    type: "multi",
-    houses: [
-      { id: "6-1", name: "Anemon", projectId: "6", floorCount: 2, roomCount: 8 },
-      { id: "6-2", name: "Acelya", projectId: "6", floorCount: 2, roomCount: 8 },
-      { id: "6-3", name: "Akasya", projectId: "6", floorCount: 2, roomCount: 8 },
-      { id: "6-4", name: "Ardıç", projectId: "6", floorCount: 2, roomCount: 8 },
-      { id: "6-5", name: "Yonca", projectId: "6", floorCount: 2, roomCount: 8 },
-      { id: "6-6", name: "Yasemin", projectId: "6", floorCount: 2, roomCount: 8 },
-      { id: "6-7", name: "Zambak", projectId: "6", floorCount: 2, roomCount: 8 },
-      { id: "6-8", name: "Zencefil", projectId: "6", floorCount: 2, roomCount: 8 },
-      { id: "6-9", name: "Zerdali", projectId: "6", floorCount: 2, roomCount: 8 },
-      { id: "6-10", name: "Lale", projectId: "6", floorCount: 2, roomCount: 8 },
-      { id: "6-11", name: "Gardenya", projectId: "6", floorCount: 2, roomCount: 8 },
-      { id: "6-12", name: "Gonca", projectId: "6", floorCount: 2, roomCount: 8 },
-      { id: "6-13", name: "Gelincik", projectId: "6", floorCount: 2, roomCount: 8 },
-      { id: "6-14", name: "Zakkum", projectId: "6", floorCount: 2, roomCount: 8 },
-      { id: "6-15", name: "Mimoza", projectId: "6", floorCount: 2, roomCount: 8 },
-      { id: "6-16", name: "Mango", projectId: "6", floorCount: 2, roomCount: 8 },
-      { id: "6-17", name: "Fesleğen", projectId: "6", floorCount: 2, roomCount: 8 },
-      { id: "6-18", name: "Petunya", projectId: "6", floorCount: 2, roomCount: 8 },
-      { id: "6-19", name: "Manolya", projectId: "6", floorCount: 2, roomCount: 8 },
-      { id: "6-20", name: "Nilüfer", projectId: "6", floorCount: 2, roomCount: 8 },
-    ],
-  },
-];
+
 
 export default function Projects() {
   const navigate = useNavigate();
@@ -298,79 +167,25 @@ export default function Projects() {
                         </div>
                       </div>
                       
-                      {/* House Types Preview */}
-                      {project.type === "multi" && project.houses && project.houses.length > 0 && (
-                        <div className="mt-3">
-                          <div className="text-xs text-muted-foreground mb-1">Konut Tipleri:</div>
-                          <div className="flex flex-wrap gap-1">
-                            {project.houses.slice(0, 5).map((house) => (
-                              <Button 
-                                key={house.id} 
-                                variant="outline" 
-                                size="sm" 
-                                className="text-xs"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleHouseClick(project, house);
-                                }}
-                              >
-                                {house.name}
-                              </Button>
-                            ))}
-                            {project.houses.length > 5 && (
-                              <Button 
-                                variant="outline" 
-                                size="sm" 
-                                className="text-xs"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleProjectClick(project);
-                                }}
-                              >
-                                +{project.houses.length - 5} daha
-                              </Button>
-                            )}
-                          </div>
-                        </div>
-                      )}
+                      {/* House Types Preview removed from here and will only be shown when 'Detayları Gör' is clicked */}
                     </CardContent>
                     
                     <CardFooter className="flex flex-col gap-2">
                       <Button 
                         variant="default" 
                         className="w-full"
-                        onClick={() => handleProjectClick(project)}
+                        onClick={() => {
+                          if (project.type === "multi" && project.houses && project.houses.length > 0) {
+                            navigate(`/projects/${project.id}?house=${project.houses[0].id}`);
+                          } else {
+                            navigate(`/projects/${project.id}`);
+                          }
+                        }}
                       >
                         Detayları Gör
                       </Button>
                       
-                      <div className="flex gap-2 w-full">
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          className="flex-1"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            navigate(`/projects/${project.id}`);
-                          }}
-                        >
-                          <Building className="h-4 w-4 mr-1" />
-                          Proje
-                        </Button>
-                        
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          className="flex-1"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            openYoutubeVideo(project);
-                          }}
-                        >
-                          <Play className="h-4 w-4 mr-1" />
-                          Video
-                        </Button>
-                      </div>
+                      {/* Buttons removed as requested */}
                     </CardFooter>
                   </Card>
                 ))}

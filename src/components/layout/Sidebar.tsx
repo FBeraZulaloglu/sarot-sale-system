@@ -8,17 +8,14 @@ import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
 import { 
   Home, 
-  Building2, 
   BarChart3, 
   Users, 
   UserCog, 
   LogOut, 
   Menu,
   ChevronRight,
-  Store,
-  Building,
-  XCircle,
-  FileText
+  FileText,
+  DollarSign,
 } from "lucide-react";
 
 interface SidebarProps {
@@ -36,7 +33,7 @@ export function Sidebar({ className }: SidebarProps) {
 
   const navItems = [
     {
-      name: "Dashboard",
+      name: "Ana Sayfa",
       href: "/",
       icon: Home,
       active: isActive("/"),
@@ -44,10 +41,10 @@ export function Sidebar({ className }: SidebarProps) {
     },
 
     {
-      name: "Sales Records",
-      href: "/sales-records",
+      name: "Tüm Satışlar",
+      href: "/sales-records-updated",
       icon: BarChart3,
-      active: isActive("/sales-records") || location.pathname.startsWith("/sales/"),
+      active: isActive("/sales-records-updated") || location.pathname.startsWith("/sales/"),
       roles: ["admin", "manager", "salesperson"],
     },
 
@@ -59,14 +56,14 @@ export function Sidebar({ className }: SidebarProps) {
       roles: ["admin", "manager", "salesperson"],
     },
     {
-      name: "Customers",
+      name: "Müşteriler",
       href: "/customers",
       icon: Users,
       active: isActive("/customers") || location.pathname.startsWith("/customers/"),
       roles: ["admin", "manager", "salesperson"],
     },
     {
-      name: "User Management",
+      name: "Kullanıcı Yönetimi",
       href: "/users",
       icon: UserCog,
       active: isActive("/users"),
@@ -88,9 +85,9 @@ export function Sidebar({ className }: SidebarProps) {
             onClick={() => setOpen(false)}
           >
             <div className="rounded-md bg-black p-1">
-              <Store className="h-6 w-6 text-white" />
+              <DollarSign className="h-6 w-6 text-white" />
             </div>
-            <span className="font-semibold text-lg text-white">SAROT DİJİTAL SATIŞ</span>
+            <span className="font-semibold text-lg text-white">SAROT DİJİTAL PORTAL</span>
           </Link>
         </div>
 

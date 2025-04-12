@@ -4,6 +4,7 @@ export interface User {
   id: string;
   email: string;
   name: string;
+  surname?: string; // Added surname field
   role: UserRole;
   createdAt: string;
 }
@@ -41,13 +42,15 @@ export interface Project {
   roomCount: number;
   floorCount: number;
   imageUrl: string;
-  image3dUrl: string;
   createdAt: string;
   images?: string[];
   houses?: House[];
   videoUrl?: string;
   type: 'single' | 'multi' | 'hotel'; // single = one house type, multi = multiple house types, hotel = hotel project
 }
+
+
+
 
 export interface Room {
   id: string;
@@ -60,12 +63,46 @@ export interface Room {
   type?: string; // Room type like 1+1, 2+1, etc.
   size?: number; // Size in square meters
   balcony?: boolean; // Whether the room has a balcony
+  floorName?: string; // Optional floor name (e.g., 'A KATI', 'B KATI', etc. for Sarot Palace)
+}
+
+export interface Season {
+  id: string;
+  name: string; // e.g., "Summer 2023", "Winter 2023-2024"
+  season_start: Date;
+  season_end: Date;
+  periods: Period[];
+}
+
+export interface Period {
+  id: string;
+  name: string; // e.g., "Dönem 27"
+  weekNumber: number;
+  startDate: Date;
+  endDate: Date;
+  seasonId: string;
 }
 
 export interface RoomReservation {
+  id: string;
   roomId: string;
+  projectId: string;
+  houseId: string;
+  salespersonId: string;
+  customerId: string;
   startDate: Date;
   endDate: Date;
+  periodId: string;
+  seasonId: string;
+  amount: number;
+  paymentStatus: 'pending' | 'completed' | 'failed';
+  paymentMethod: 'credit_card' | 'bank_transfer' | 'cash';
+  tax: number;
+  createdAt: Date;
+  isConfirmed?: boolean;
+  isCanceled?: boolean;
+  cancellationReason?: string;
+  cancellationDate?: Date;
 }
 
 export interface Customer {
@@ -76,6 +113,13 @@ export interface Customer {
   phone: string;
   associatedProjectIds: string[]; // Changed from single associatedProjectId to array
   createdAt: string;
+}
+
+export interface PaymentMethod {
+  type: 'cash' | 'credit_card' | 'bank_transfer' | 'installment' | 'check';
+  amount: number;
+  date: string;
+  installmentCount?: string; // Number of installments for installment or bank transfer payments
 }
 
 export interface SaleRecord {
@@ -89,8 +133,10 @@ export interface SaleRecord {
   amount: number;
   paymentStatus: 'pending' | 'completed' | 'failed';
   paymentMethod: 'credit_card' | 'bank_transfer' | 'cash';
+  paymentMethods?: PaymentMethod[]; // Multiple payment methods
   tax: number;
   createdAt: string;
+  isConfirmed?: boolean; // Added isConfirmed field for sale confirmation status
   isCanceled?: boolean;
   cancellationReason?: string;
   cancellationDate?: string;
@@ -102,6 +148,11 @@ export interface SaleRecordWithDetails extends SaleRecord {
   room?: Room;
   customer?: Customer;
   salesperson?: User;
+  reservation?: RoomReservation; // Added reservation information
+  period?: Period; // Period (Dönem) information
+  season?: Season; // Season information
+  saleDate?: Date; // Sale date (Satış Tarihi)
+  house?: House; // House information for multi-house projects
 }
 
 export type TapuStatus = 'pending' | 'completed' | 'canceled';
