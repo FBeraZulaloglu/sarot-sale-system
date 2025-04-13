@@ -4,8 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { Project, Room, House } from "@/types";
 import { 
-  ChevronLeft, Building2, Home, Calendar, 
-  BedDouble, DollarSign, Users, Play, Layers, Building, Hotel
+  ChevronLeft, Building2, Home, Calendar, Check,
+  BedDouble, DollarSign, Users, Play, Layers, Building, Hotel,
+  PlusCircle, UserCog, FileText
 } from "lucide-react";
 import { DateRangeFilter } from "@/components/projects/DateRangeFilter";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -20,13 +21,12 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-import { Link, useParams, useSearchParams } from "react-router-dom";
-import { MOCK_PROJECTS, MOCK_ROOMS } from "@/data/projects";
+import { Link, useParams, useSearchParams, useNavigate } from "react-router-dom";
+import { MOCK_PROJECTS, MOCK_ROOMS, projectFloorConfigs } from "@/data/projects";
 import { MOCK_RESERVATIONS } from "@/data/reservations";
 
-
-
 export default function ProjectDetails() {
+  const navigate = useNavigate();
   const { projectId } = useParams<{ projectId: string }>();
   const [searchParams] = useSearchParams();
   const houseId = searchParams.get('house');
@@ -34,9 +34,10 @@ export default function ProjectDetails() {
   const [startDateFilter, setStartDateFilter] = useState<Date | undefined>(undefined);
   const [endDateFilter, setEndDateFilter] = useState<Date | undefined>(undefined);
   const [isVideoDialogOpen, setVideoDialogOpen] = useState(false);
-  const [selectedFloor, setSelectedFloor] = useState<number>(1);
+  const [selectedFloor, setSelectedFloor] = useState<number | string>(1);
   const [tabsValue, setTabsValue] = useState<string>('1');
   const [selectedHouse, setSelectedHouse] = useState<House | null>(null);
+  const [selectedFloorType, setSelectedFloorType] = useState<string>('A-C');
   const youtubeVideoId = "MHfT2GAOMV4";
 
   // Find the selected house if houseId is provided
@@ -80,41 +81,47 @@ export default function ProjectDetails() {
     if (selectedHouse && room.houseId !== selectedHouse.id) {
       return false;
     }
-    
-    // Filter by date range if both dates are selected
+
     const isAvailableInDateRange = isRoomAvailableBetweenDates(room.id, startDateFilter, endDateFilter);
+    if (startDateFilter && endDateFilter && !isAvailableInDateRange) {
+      return false;
+    }
+
     
-    // Filter by status
-    const matchesStatus = true; // Always true since we don't have a status filter
-    
-    // Filter by price if price filter is set
-    const matchesPrice = true; // Always true since we don't have a price filter
-    
-    // Combined filter result
-    return isAvailableInDateRange && matchesStatus && matchesPrice;
+    return isAvailableInDateRange;
   });
 
   // Group rooms by floor
-  const roomsByFloor = filteredRooms.reduce<Record<number, Room[]>>((acc, room) => {
+  const roomsByFloor = rooms.reduce((acc, room) => {
     if (!acc[room.floor]) {
       acc[room.floor] = [];
     }
     acc[room.floor].push(room);
     return acc;
-  }, {});
+  }, {} as Record<string | number, Room[]>);
 
-  // Get available floors
-  const availableFloors = Object.keys(roomsByFloor).map(Number).sort((a, b) => a - b);
+  // Get available floors - handle both numeric and string floor types
+  const availableFloors = Object.keys(roomsByFloor).map(floor => {
+    return isNaN(Number(floor)) ? floor : Number(floor);
+  }).sort((a, b) => {
+    // Custom sort function to handle both string and number floors
+    if (typeof a === 'string' && typeof b === 'string') return a.localeCompare(b);
+    if (typeof a === 'number' && typeof b === 'number') return a - b;
+    // String floors come before number floors
+    return typeof a === 'string' ? -1 : 1;
+  });
 
   // Ensure selectedFloor is valid
   useEffect(() => {
-    if (availableFloors.length > 0 && !availableFloors.includes(selectedFloor)) {
+    if (availableFloors.length > 0 && !selectedFloor) {
+      // Sadece selectedFloor boşsa ilk katı seç
       setSelectedFloor(availableFloors[0]);
+      setTabsValue(availableFloors[0].toString());
     }
-  }, [availableFloors, selectedFloor]);
+  }, [availableFloors]); // selectedFloor'u bağımlılıklardan kaldır
 
   // Get rooms for the selected floor
-  const roomsForSelectedFloor = roomsByFloor[selectedFloor] || [];
+  const roomsForSelectedFloor = roomsByFloor[selectedFloor.toString()] || [];
 
   // Count rooms by status - only if date filter is applied
   const isDateFilterApplied = startDateFilter !== undefined && endDateFilter !== undefined;
@@ -144,7 +151,8 @@ export default function ProjectDetails() {
   // Calculate room status by floor - only if date filter is applied
   const roomStatusByFloor = Object.entries(roomsByFloor).reduce((acc, [floor, floorRooms]) => {
     if (isDateFilterApplied) {
-      acc[Number(floor)] = {
+      // Use the floor as is (could be string or number)
+      acc[floor] = {
         total: floorRooms.length,
         available: floorRooms.filter(room => room.status === 'available' && 
           isRoomAvailableBetweenDates(room.id, startDateFilter, endDateFilter)).length,
@@ -153,7 +161,7 @@ export default function ProjectDetails() {
         sold: floorRooms.filter(room => room.status === 'sold').length,
       };
     } else {
-      acc[Number(floor)] = {
+      acc[floor] = {
         total: floorRooms.length,
         available: 0,
         reserved: 0,
@@ -161,20 +169,25 @@ export default function ProjectDetails() {
       };
     }
     return acc;
-  }, {} as Record<number, typeof roomCounts>);
-
-  // Calculate total rooms by floor
+  }, {} as Record<string | number, { total: number; available: number; reserved: number; sold: number }>);
+  
+  // Count total rooms by floor
   const totalRoomsByFloor = Object.entries(roomsByFloor).reduce((acc, [floor, rooms]) => {
-    acc[Number(floor)] = rooms.length;
+    acc[floor] = rooms.length;
     return acc;
-  }, {} as Record<number, number>);
-
+  }, {} as Record<string | number, number>);
+  
+  // State for active filters
   const [activeFilters, setActiveFilters] = useState<{
     selectedDonems: string[];
     roomCount?: string;
     roomType?: string;
-  }>({ selectedDonems: [] });
+    floorType?: string;
+  }>({
+    selectedDonems: [],
+  });
 
+  // Handle date range filter
   const handleDateRangeFilter = (
     startDate: Date | undefined, 
     endDate: Date | undefined,
@@ -183,42 +196,24 @@ export default function ProjectDetails() {
     roomType?: string,
     weekNumber?: string,
     donem?: string | string[],
-    donemType?: 'single' | 'multiple' | 'all'
+    donemType?: 'single' | 'multiple' | 'all',
+    floorType?: string
   ) => {
-    // Set date filters
     setStartDateFilter(startDate);
     setEndDateFilter(endDate);
     
-    // If period (dönem) is selected, we need to set proper date range
-    if (donem && donemType) {
-      if (donemType === 'single' && typeof donem === 'string') {
-        // For single period selection, create a date range for the selected period
-        const periodWeek = parseInt(donem);
-        const today = new Date();
-        const year = today.getFullYear();
-        
-        // Simple period to date calculation (each period is roughly 7 days)
-        const periodStart = new Date(year, 0, 1 + (periodWeek - 1) * 7);
-        const periodEnd = new Date(periodStart);
-        periodEnd.setDate(periodStart.getDate() + 6);
-        
-        setStartDateFilter(periodStart);
-        setEndDateFilter(periodEnd);
-      } else if (donemType === 'multiple' && Array.isArray(donem) && donem.length > 0) {
-        // For multiple period selection, use the first and last periods to create a range
-        const periodNumbers = donem.map(d => parseInt(d)).sort((a, b) => a - b);
-        const firstPeriod = periodNumbers[0];
-        const lastPeriod = periodNumbers[periodNumbers.length - 1];
-        
-        const today = new Date();
-        const year = today.getFullYear();
-        
-        const periodStart = new Date(year, 0, 1 + (firstPeriod - 1) * 7);
-        const periodEnd = new Date(year, 0, 1 + (lastPeriod - 1) * 7 + 6);
-        
-        setStartDateFilter(periodStart);
-        setEndDateFilter(periodEnd);
-      }
+    // Update active filters
+    const selectedDonems = Array.isArray(donem) ? donem : donem ? [donem] : [];
+    setActiveFilters({
+      selectedDonems,
+      roomCount,
+      roomType,
+      floorType
+    });
+    
+    // If floor type is provided, update the selected floor type
+    if (floorType) {
+      setSelectedFloorType(floorType);
     }
   };
 
@@ -226,8 +221,49 @@ export default function ProjectDetails() {
     selectedDonems: string[];
     roomCount?: string;
     roomType?: string;
+    floorType?: string;
   }) => {
     setActiveFilters(filterInfo);
+    
+    // Update the selected floor type when it changes in the DateRangeFilter
+    if (filterInfo.floorType && filterInfo.floorType !== selectedFloorType) {
+      // Sadece floor type değiştiğinde bu işlemleri yap
+      setSelectedFloorType(filterInfo.floorType);
+      
+      // Her proje için uygun kat seçimini yap
+      let floorToSelect;
+      
+      if (project.name === 'Sarot Palace') {
+        if (filterInfo.floorType === 'A-C') {
+          // Önce A, A1, B, C katları arasında odası olan ilk katı bul
+          floorToSelect = Object.keys(roomsByFloor)
+            .find(floor => ['A', 'A1', 'B', 'C'].includes(floor));
+        } else if (filterInfo.floorType === 'D-F') {
+          // Önce D, E, F katları arasında odası olan ilk katı bul
+          floorToSelect = Object.keys(roomsByFloor)
+            .find(floor => ['D', 'E', 'F'].includes(floor));
+        } else if (filterInfo.floorType === 'penthouse') {
+          // Penthouse katını bul
+          floorToSelect = Object.keys(roomsByFloor)
+            .find(floor => floor === 'P');
+        }
+      } else if (project.name === 'Sarot Termal Country') {
+        if (filterInfo.floorType === 'A-D-V') {
+          floorToSelect = Object.keys(roomsByFloor)
+            .find(floor => ['A', 'B', 'C', 'D', 'V'].includes(floor));
+        } else if (filterInfo.floorType === 'E-H') {
+          floorToSelect = Object.keys(roomsByFloor)
+            .find(floor => ['E', 'F', 'G', 'H'].includes(floor));
+        }
+      }
+      
+      // Eğer seçilecek bir kat bulunduysa güncelle
+      if (floorToSelect) {
+        const floorValue = isNaN(Number(floorToSelect)) ? floorToSelect : Number(floorToSelect);
+        setSelectedFloor(floorValue);
+        setTabsValue(floorToSelect.toString());
+      }
+    }
   };
 
   return (
@@ -248,115 +284,61 @@ export default function ProjectDetails() {
           <div className="mb-8">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <Carousel className="w-full">
+                <h1 className="text-3xl font-bold mb-2">{project.name}</h1>
+                
+                <div className="flex flex-wrap gap-2 mb-4">
+                  <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                    {project.type}
+                  </Badge>
+                </div>
+                
+                <div className="flex items-center gap-4 mb-6">
+                  <Button onClick={() => setVideoDialogOpen(true)} variant="outline" className="flex items-center gap-2">
+                    <Play className="h-4 w-4" />
+                    Tanıtım Videosu
+                  </Button>
+                </div>
+                
+                <div className="prose prose-slate max-w-none">
+                  <p>{project.description}</p>
+                </div>
+              </div>
+              
+              <div>
+                <Carousel className="w-full max-w-lg mx-auto">
                   <CarouselContent>
                     {project.images?.map((image, index) => (
                       <CarouselItem key={index}>
                         <div className="p-1">
-                          <div className="overflow-hidden rounded-lg">
-                            <img 
-                              src={image} 
-                              alt={`${project.name} - Image ${index + 1}`}
-                              className="w-full h-64 object-cover"
-                            />
-                          </div>
+                          <Card>
+                            <CardContent className="flex aspect-square items-center justify-center p-0">
+                              <img
+                                src={image}
+                                alt={`${project.name} - Image ${index + 1}`}
+                                className="w-full h-full object-cover rounded-md"
+                              />
+                            </CardContent>
+                          </Card>
                         </div>
                       </CarouselItem>
                     ))}
                   </CarouselContent>
-                  <div className="flex justify-center mt-4 gap-2">
-                    <CarouselPrevious className="static" />
-                    <CarouselNext className="static" />
-                  </div>
+                  <CarouselPrevious />
+                  <CarouselNext />
                 </Carousel>
-              </div>
-
-              <div>
-                <h1 className="text-3xl font-bold mb-2">{project.name}</h1>
-                {selectedHouse && (
-                  <Badge variant="outline" className="mb-2">
-                    {selectedHouse.name} Konut Tipi
-                  </Badge>
-                )}
-                <p className="text-muted-foreground mb-4">{project.description}</p>
-                
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="flex items-center gap-2">
-                    <Building2 className="h-4 w-4 text-muted-foreground" />
-                    <div>
-                      <p className="text-sm font-medium">{selectedHouse?.floorCount || project.floorCount}</p>
-                      <p className="text-xs text-muted-foreground">Kat Sayısı</p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center gap-2">
-                    <Home className="h-4 w-4 text-muted-foreground" />
-                    <div>
-                      <p className="text-sm font-medium">{selectedHouse?.roomCount || project.roomCount}</p>
-                      <p className="text-xs text-muted-foreground">Konut Sayısı</p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center gap-2">
-                    <Users className="h-4 w-4 text-muted-foreground" />
-                    <div>
-                      <p className="text-sm font-medium">
-                        {Math.floor((selectedHouse?.roomCount || project.roomCount) * 0.7)}
-                      </p>
-                      <p className="text-xs text-muted-foreground">Satılan Konutlar</p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center gap-2">
-                    <Calendar className="h-4 w-4 text-muted-foreground" />
-                    <div>
-                      <p className="text-sm font-medium">
-                        {new Date(project.createdAt).toLocaleDateString()}
-                      </p>
-                      <p className="text-xs text-muted-foreground">Başlangıç Tarihi</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="mt-4">
-                  <Button 
-                    onClick={() => setVideoDialogOpen(true)}
-                    className="flex items-center gap-2"
-                  >
-                    <Play className="h-4 w-4" />
-                    Tanıtım Videosunu İzle
-                  </Button>
-                </div>
               </div>
             </div>
           </div>
 
           {/* House Selector for Multi-House Projects */}
-          {project.type === "multi" && project.houses && project.houses.length > 0 && (
+          {project.houses && project.houses.length > 0 && (
             <div className="mb-8">
               <Card>
                 <CardHeader>
-                  <CardTitle>Konutlar</CardTitle>
+                  <CardTitle>Blok Seçimi</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-3">
-                    {project.houses.map((house) => (
-                      <Button 
-                        key={house.id} 
-                        variant="outline"
-                        className={`w-full h-14 flex flex-col items-center justify-center py-3 rounded-lg shadow-sm transition-all duration-200 ${
-                          selectedHouse?.id === house.id 
-                            ? 'bg-gradient-to-r from-rose-900 to-amber-800 text-amber-50 hover:from-rose-800 hover:to-amber-700 border-none shadow-md' 
-                            : 'bg-gradient-to-r from-amber-50 to-rose-50 text-rose-900 hover:from-amber-100 hover:to-rose-100 border-rose-200'
-                        }`}
-                        onClick={() => setSelectedHouse(house)}
-                      >
-                        <div className="flex items-center gap-2">
-                          <Hotel className={`h-4 w-4 ${selectedHouse?.id === house.id ? 'text-amber-200' : 'text-rose-700'}`} />
-                          <span className="font-medium">{house.name}</span>
-                        </div>
-                      </Button>
-                    ))}
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
                     {selectedHouse && (
                       <Button 
                         variant="outline" 
@@ -369,13 +351,31 @@ export default function ProjectDetails() {
                         </div>
                       </Button>
                     )}
+                    
+                    {project.houses.map((house) => (
+                      <Button
+                        key={house.id}
+                        variant="outline"
+                        className={`w-full h-14 flex flex-col items-center justify-center py-3 rounded-lg shadow-sm ${
+                          selectedHouse?.id === house.id
+                            ? 'bg-gradient-to-r from-blue-50 to-blue-100 text-blue-700 border-blue-200'
+                            : 'bg-gradient-to-r from-gray-100 to-gray-50 text-gray-700 hover:from-gray-200 hover:to-gray-100 border-gray-200'
+                        }`}
+                        onClick={() => setSelectedHouse(house)}
+                      >
+                        <div className="flex items-center gap-2">
+                          <Building2 className={`h-4 w-4 ${selectedHouse?.id === house.id ? 'text-blue-500' : 'text-gray-500'}`} />
+                          <span className="font-medium">{house.name}</span>
+                        </div>
+                      </Button>
+                    ))}
                   </div>
                 </CardContent>
               </Card>
             </div>
           )}
         </div>
-        
+
         {/* Filter System */}
         <div className="mt-8">
           <Card>
@@ -383,339 +383,295 @@ export default function ProjectDetails() {
               <CardTitle>Konut Arama</CardTitle>
             </CardHeader>
             <CardContent>
-              <DateRangeFilter onFilter={handleDateRangeFilter} onFilterChange={handleFilterChange} />
+              <DateRangeFilter 
+                onFilter={handleDateRangeFilter} 
+                onFilterChange={handleFilterChange}
+                projectName={project.name}
+                projectId={project.id}
+              />
             </CardContent>
           </Card>
         </div>
-        
-        {/* Floor Plans */}
-        <Tabs value={tabsValue} onValueChange={setTabsValue} className="mt-8">
-          {/* Active Filter Information */}
-          {activeFilters.selectedDonems.length > 0 && (
-            <div className="mb-4">
-              <Card className="bg-amber-50 border-amber-200">
-                <CardContent className="p-3">
-                  <div className="flex items-center gap-2">
-                    <Calendar className="h-5 w-5 text-amber-700" />
-                    <div>
-                      <span className="font-medium text-amber-900">Seçili Dönemler: </span>
-                      <span className="text-amber-800">
-                        {activeFilters.selectedDonems.map((donem, index) => (
-                          <Badge key={donem} variant="outline" className="bg-amber-100 text-amber-800 border-amber-300 mr-1">
-                            {donem}. Dönem
-                          </Badge>
-                        ))}
-                      </span>
-                    </div>
-                  </div>
-                  {activeFilters.roomCount && (
-                    <div className="flex items-center gap-2 mt-2">
-                      <Home className="h-5 w-5 text-amber-700" />
-                      <div>
-                        <span className="font-medium text-amber-900">Oda Tipi: </span>
-                        <Badge variant="outline" className="bg-amber-100 text-amber-800 border-amber-300">
-                          {activeFilters.roomCount}
-                        </Badge>
-                      </div>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </div>
-          )}
-          
-          <div className="mb-8">
-            <div className="mb-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Layers className="h-5 w-5" />
-                    Kat {selectedFloor} Bilgileri
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {isDateFilterApplied ? (
-                    /* Show room status counts after dönem selection */
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                      <div className="p-3 bg-muted/20 rounded-md">
-                        <div className="text-sm text-muted-foreground flex items-center gap-1">
-                          <Hotel className="h-4 w-4" />
-                          Tüm Daire Sayısı
+
+        {/* Selected Floors Cards */}
+        <div className="mb-8">
+          <Card className="bg-white border-slate-200">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Building2 className="h-5 w-5 text-blue-600" />
+                Seçilen Katlar
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {(() => {
+                  // Hangi katları göstereceğimizi belirleyelim
+                  let floorsToShow = [];
+                  
+                  if (project.name === 'Sarot Palace') {
+                    if (selectedFloorType === 'A-C') {
+                      floorsToShow = ['A', 'A1', 'B', 'C'];
+                    } else if (selectedFloorType === 'D-F') {
+                      floorsToShow = ['D', 'E', 'F'];
+                    } else if (selectedFloorType === 'penthouse') {
+                      floorsToShow = ['P'];
+                    } else {
+                      // Eğer kat tipi seçilmemişse tüm katları göster
+                      floorsToShow = ['A', 'A1', 'B', 'C', 'D', 'E', 'F', 'P'];
+                    }
+                  } else {
+                    // Diğer projeler için mevcut katları kullan
+                    floorsToShow = Object.keys(roomsByFloor);
+                  }
+                  
+                  return floorsToShow.map(floorKey => {
+                    // Determine floor type styling for Sarot Palace
+                    let cardBg = '';
+                    let cardBorder = '';
+                    let badgeBg = '';
+                    let badgeText = '';
+                    let headerBg = '';
+                    let headerText = '';
+                    
+                    // Kat için oda sayılarını hesapla
+                    const totalRooms = roomsByFloor[floorKey]?.length || 0;
+                    const availableRooms = isDateFilterApplied && roomsByFloor[floorKey] ? 
+                      roomsByFloor[floorKey].filter(room => 
+                        room.status === 'available' && isRoomAvailableBetweenDates(room.id, startDateFilter, endDateFilter)
+                      ).length || 0 : 0;
+                    const reservedRooms = isDateFilterApplied && roomsByFloor[floorKey] ? 
+                      roomsByFloor[floorKey].filter(room => 
+                        room.status === 'reserved' || !isRoomAvailableBetweenDates(room.id, startDateFilter, endDateFilter)
+                      ).length || 0 : 0;
+                    const soldRooms = isDateFilterApplied && roomsByFloor[floorKey] ? 
+                      roomsByFloor[floorKey].filter(room => 
+                        room.status === 'sold'
+                      ).length || 0 : 0;
+                    
+                    // Kat adı belirleme - projects.ts'den al
+                    let floorName = '';
+                    
+                    // Önce roomsByFloor'dan kat adını almaya çalış
+                    if (roomsByFloor[floorKey]?.[0]?.floorName) {
+                      floorName = roomsByFloor[floorKey][0].floorName;
+                    } 
+                    // Yoksa projectFloorConfigs'den bulmaya çalış
+                    else {
+                      // Projenin kat yapılandırmasını bul
+                      const projectConfig = projectFloorConfigs?.[project.id];
+                      if (projectConfig) {
+                        // Bu kat için yapılandırmasını bul
+                        const floorConfig = projectConfig.find(config => config.floor === floorKey);
+                        if (floorConfig?.floorName) {
+                          floorName = floorConfig.floorName;
+                        }
+                      }
+                    }
+                    
+                    return (
+                      <Card 
+                        key={`floor-card-${floorKey}`} 
+                        className={`overflow-hidden cursor-pointer hover:bg-blue-50 transition-colors ${cardBg} ${cardBorder} ${selectedFloor === floorKey ? 'ring-2 ring-offset-1 ring-blue-400' : ''}`}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          setSelectedFloor(floorKey);
+                          setTabsValue(floorKey.toString());
+                        }}
+                      >
+                        <div className={`py-3 px-4 ${headerBg} ${headerText} font-medium flex items-center justify-between`}>
+                          <div className="flex items-center gap-2">
+                            <span>{floorName}</span>
+                          </div>
+                          <span className={`text-sm font-medium ${selectedFloor === floorKey ? 'text-blue-700' : 'text-muted-foreground'}`}>
+                            {selectedFloor === floorKey ? 'Seçili' : 'Seç'}
+                          </span>
                         </div>
-                        <div className="text-2xl font-bold">{roomStatusByFloor[selectedFloor]?.total || 0}</div>
-                      </div>
-                      <div className="p-3 bg-green-50 rounded-md">
-                        <div className="text-sm text-green-700 flex items-center gap-1">
-                          <BedDouble className="h-4 w-4" />
-                          Müsait Daire Sayısı
-                        </div>
-                        <div className="text-2xl font-bold text-green-700">{roomStatusByFloor[selectedFloor]?.available || 0}</div>
-                      </div>
-                      <div className="p-3 bg-amber-50 rounded-md">
-                        <div className="text-sm text-amber-700 flex items-center gap-1">
-                          <Calendar className="h-4 w-4" />
-                          Rezerve Edilmiş Daire Sayısı
-                        </div>
-                        <div className="text-2xl font-bold text-amber-700">{roomStatusByFloor[selectedFloor]?.reserved || 0}</div>
-                      </div>
-                      <div className="p-3 bg-blue-50 rounded-md">
-                        <div className="text-sm text-blue-700 flex items-center gap-1">
-                          <DollarSign className="h-4 w-4" />
-                          Satılmış Daire Sayısı
-                        </div>
-                        <div className="text-2xl font-bold text-blue-700">{roomStatusByFloor[selectedFloor]?.sold || 0}</div>
-                      </div>
-                    </div>
-                  ) : (
-                    /* Show room type counts before dönem selection */
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                      {Object.entries(roomCountsByType)
-                        .filter(([type]) => type !== 'unknown')
-                        .map(([type, count], index) => (
-                          <div key={type} className="p-3 bg-gray-50 rounded-md">
-                            <div className="text-sm text-gray-700 flex items-center gap-1">
-                              <BedDouble className="h-4 w-4" />
-                              {type} Daire
+                        <CardContent className="p-4">
+                          <div className="grid grid-cols-2 gap-2 mb-3">
+                            <div className="flex flex-col">
+                              <span className="text-xs text-muted-foreground">Toplam Daire</span>
+                              <span className="font-medium text-lg">{totalRooms}</span>
                             </div>
-                            <div className="text-2xl font-bold text-gray-700">
-                              {count}
+                            {isDateFilterApplied && (
+                              <div className="grid grid-cols-2 gap-2">
+                                <div className="flex flex-col">
+                                  <span className="text-xs text-muted-foreground">Müsait</span>
+                                  <span className="font-medium text-lg text-green-600">{availableRooms}</span>
+                                </div>
+                                <div className="flex flex-col">
+                                  <span className="text-xs text-muted-foreground">Rezerve</span>
+                                  <span className="font-medium text-lg text-amber-600">{reservedRooms}</span>
+                                </div>
+                                <div className="flex flex-col">
+                                  <span className="text-xs text-muted-foreground">Satılmış</span>
+                                  <span className="font-medium text-lg text-blue-600">{soldRooms}</span>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                          
+                          {/* Proje ve kata özel dönem başlangıç bilgisi */}
+                          <div className="mt-3 text-xs text-slate-600">
+                            <div>
+                              Dönem başlangıcı: <span className="font-medium">
+                                {project.name === 'Sarot Palace' && 
+                                  (['A', 'A1', 'B', 'C'].includes(floorKey) ? '30 Aralık' : 
+                                   ['D', 'E', 'F'].includes(floorKey) ? '31 Aralık' : 
+                                   floorKey === 'P' ? '1 Ocak' : '30 Aralık')
+                                }
+                                {project.name === 'Sarot Teras Evler' && 
+                                  (['G', 'H', 'I', 'J'].includes(floorKey) ? '31 Aralık' : '1 Ocak')
+                                }
+                                {project.name === 'Sarot Termal Vadi' && 
+                                  (['F', 'L', 'M', 'N', 'S'].includes(floorKey) ? '31 Aralık' : '1 Ocak')
+                                }
+                                {project.name === 'Sarot Termal Country' && 
+                                  (['A', 'B', 'C', 'D', 'V'].includes(floorKey) ? '01 Ocak' : 
+                                  ['E', 'F', 'G', 'H'].includes(floorKey) ? '02 Ocak' : 'KAT YOK')
+                                }
+                                {project.name === 'Burj-Al Babas' && '1 Mart'}
+                              </span>
                             </div>
                           </div>
-                        ))
-                      }
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </div>
-            
-            <div className="mb-3 grid grid-cols-2 md:grid-cols-4 gap-3">
-              {Array.from({ length: project.floorCount }, (_, i) => i + 1).map((floor) => {
-                // Calculate percentage of available rooms for this floor
-                const availablePercentage = roomStatusByFloor[floor] ? 
-                  (roomStatusByFloor[floor].available / roomStatusByFloor[floor].total) * 100 : 0;
-                
-                return (
-                <Card 
-                  key={`summary-${floor}`} 
-                  className={`p-0 cursor-pointer transition-all hover:shadow-md overflow-hidden ${selectedFloor === floor ? 'ring-2 ring-primary' : ''}`}
-                  onClick={() => {
-                    setSelectedFloor(floor);
-                    setTabsValue(floor.toString());
-                  }}
-                >
-                  <div className="bg-gradient-to-br from-blue-50 to-blue-100 bg-opacity-70 p-3 relative">
-                    <div className="absolute top-2 right-2 bg-white bg-opacity-80 rounded-full p-1.5 shadow-sm">
-                      <Building className="h-4 w-4 text-gray-700" />
-                    </div>
+                        </CardContent>
+                      </Card>
+                    );
+                  });
+                })()}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Selected Floor Rooms as Cards */}
+        {selectedFloor && (
+          <div className="mb-8">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Hotel className="h-5 w-5 text-blue-600" />
+                  {selectedFloor} Katı Odaları
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+                  {roomsByFloor[selectedFloor]?.map((room) => {
+                    // Determine status colors and styles
+                    let statusColor = '';
+                    let statusBg = '';
+                    let statusBorder = '';
+                    let statusIcon = null;
                     
-                    <div className="flex items-center gap-2 mb-1">
-                      <Layers className="h-4 w-4" />
-                      <div className="text-sm font-medium">{roomsByFloor[floor]?.[0]?.floorName} (Kat {floor})</div>
-                    </div>
-                    
-                    <div className="flex items-center gap-2">
-                      <Hotel className="h-4 w-4" />
-                      <div className="text-lg font-bold">
-                        {totalRoomsByFloor[floor]} Daire
-                      </div>
-                    </div>
-                    
-                    {/* Room availability indicator */}
-                    <div className="mt-2 h-1.5 w-full bg-gray-200 rounded-full overflow-hidden">
-                      <div 
-                        className="h-full bg-green-500 rounded-full" 
-                        style={{ width: `${availablePercentage}%` }}
-                      />
-                    </div>
-                    <div className="mt-1 text-xs flex justify-between">
-                      <span>{roomStatusByFloor[floor]?.available || 0} müsait</span>
-                      <span className="text-muted-foreground">{roomStatusByFloor[floor]?.total || 0} total</span>
-                    </div>
-                  </div>
-                </Card>
-                );
-              })}
-            </div>
-          </div>
-            
-          {/* Rooms grid for each floor */}
-          {Array.from({ length: project.floorCount }, (_, i) => i + 1).map((floor) => (
-            <TabsContent key={floor} value={floor.toString()} className="space-y-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Calendar className="h-5 w-5" />
-                    {/* Display floor name if available (for Sarot Palace) */}
-                    {roomsByFloor[floor]?.[0]?.floorName ? 
-                      `${roomsByFloor[floor][0].floorName} - Odalar (${roomStatusByFloor[floor]?.available || 0} müsait)` : 
-                      `Floor ${floor} - Odalar (${roomStatusByFloor[floor]?.available || 0} müsait)`
+                    if (room.status === 'available') {
+                      statusColor = 'text-green-700';
+                      statusBg = 'bg-green-50';
+                      statusBorder = 'border-green-200';
+                      statusIcon = <Check className="h-4 w-4" />;
+                    } else if (room.status === 'reserved') {
+                      statusColor = 'text-amber-700';
+                      statusBg = 'bg-amber-50';
+                      statusBorder = 'border-amber-200';
+                      statusIcon = <Calendar className="h-4 w-4" />;
+                    } else if (room.status === 'sold') {
+                      statusColor = 'text-blue-700';
+                      statusBg = 'bg-blue-50';
+                      statusBorder = 'border-blue-200';
+                      statusIcon = <DollarSign className="h-4 w-4" />;
                     }
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {roomsByFloor[floor]?.length ? (
-                    <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-4">
-                       {roomsByFloor[floor]?.map((room) => {
-                        // Determine status colors and styles based on filtering
-                        // Use gray colors when no filter is applied, status-specific colors when filtered
-                        const statusConfig = {
-                          available: {
-                            bgColor: isDateFilterApplied ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200',
-                            textColor: isDateFilterApplied ? 'text-green-700' : 'text-gray-700',
-                            hoverColor: isDateFilterApplied ? 'hover:bg-green-100' : 'hover:bg-gray-100',
-                            icon: <BedDouble className="h-4 w-4" />,
-                            label: isDateFilterApplied ? 'Müsait' : room.type || 'Daire'
-                          },
-                          reserved: {
-                            bgColor: isDateFilterApplied ? 'bg-amber-50 border-amber-200' : 'bg-gray-50 border-gray-200',
-                            textColor: isDateFilterApplied ? 'text-amber-700' : 'text-gray-700',
-                            hoverColor: isDateFilterApplied ? 'hover:bg-amber-100' : 'hover:bg-gray-100',
-                            icon: isDateFilterApplied ? <Calendar className="h-4 w-4" /> : <BedDouble className="h-4 w-4" />,
-                            label: isDateFilterApplied ? 'Rezerve' : room.type || 'Daire'
-                          },
-                          sold: {
-                            bgColor: isDateFilterApplied ? 'bg-blue-50 border-blue-200' : 'bg-gray-50 border-gray-200',
-                            textColor: isDateFilterApplied ? 'text-blue-700' : 'text-gray-700',
-                            hoverColor: isDateFilterApplied ? 'hover:bg-blue-100' : 'hover:bg-gray-100',
-                            icon: isDateFilterApplied ? <DollarSign className="h-4 w-4" /> : <BedDouble className="h-4 w-4" />,
-                            label: isDateFilterApplied ? 'Satıldı' : room.type || 'Daire'
-                          }
-                        };
-                        
-                        const config = statusConfig[room.status];
-                        
-                        return (
-                        <TooltipProvider key={room.id}>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              {isDateFilterApplied ? (
-                                // Determine if the room is actually available for the selected period
-                                // A room is available if its status is 'available' AND it has no overlapping reservations
-                                room.status === 'available' && isRoomAvailableBetweenDates(room.id, startDateFilter, endDateFilter) ? (
-                                  // For available rooms, show clickable link to create sale
-                                  <Link
-                                    to={`/sales/new?roomId=${room.id}&periodId=${activeFilters?.selectedDonems?.[0] || ''}`}
-                                    className={`block group border ${config.bgColor} ${config.hoverColor} rounded-lg shadow-sm overflow-hidden transition-all hover:shadow-md`}
-                                  >
-                                    {/* Room number header */}
-                                    <div className={`${config.bgColor} border-b ${config.textColor} py-1.5 px-2 font-medium flex justify-between items-center`}>
-                                      <span className="text-sm">{room.roomNumber}</span>
-                                      {config.icon}
-                                    </div>
-                                    
-                                    {/* Room content */}
-                                    <div className="p-2">
-                                      {/* Status badge */}
-                                      <div className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${config.bgColor} ${config.textColor} border`}>
-                                        {config.icon}
-                                        <span>{config.label}</span>
-                                      </div>
-                                      
-                                      {/* Price */}
-                                      <div className="mt-2 flex items-center justify-between">
-                                        <div className="flex items-center gap-1 text-sm font-medium">
-                                          <DollarSign className="h-3.5 w-3.5" />
-                                          <span>${(room.price / 1000).toFixed(0)}k</span>
-                                        </div>
-                                        
-                                        {/* Action button */}
-                                        <div className="rounded-full p-1 bg-green-100">
-                                          <DollarSign className="h-3.5 w-3.5 text-green-700" />
-                                        </div>
-                                      </div>
-                                    </div>
-                                  </Link>
-                                ) : (
-                                  // For reserved or sold rooms, show a non-clickable card
-                                  <div className={`block group border ${config.bgColor} rounded-lg shadow-sm overflow-hidden cursor-not-allowed`}>
-                                    {/* Room number header */}
-                                    <div className={`${config.bgColor} border-b ${config.textColor} py-1.5 px-2 font-medium flex justify-between items-center`}>
-                                      <span className="text-sm">{room.roomNumber}</span>
-                                      {config.icon}
-                                    </div>
-                                    
-                                    {/* Room content */}
-                                    <div className="p-2">
-                                      {/* Status badge */}
-                                      <div className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${config.bgColor} ${config.textColor} border`}>
-                                        {config.icon}
-                                        <span>{config.label}</span>
-                                      </div>
-                                      
-                                      {/* Price */}
-                                      <div className="mt-2 flex items-center justify-between">
-                                        <div className="flex items-center gap-1 text-sm font-medium">
-                                          <DollarSign className="h-3.5 w-3.5" />
-                                          <span>${(room.price / 1000).toFixed(0)}k</span>
-                                        </div>
-                                        
-                                        {/* Action button */}
-                                        <div className="rounded-full p-1 bg-gray-100">
-                                          <Users className="h-3.5 w-3.5 text-gray-500" />
-                                        </div>
-                                      </div>
-                                    </div>
-                                  </div>
-                                )
-                              ) : (
-                                // When no date filter is applied, show disabled room card
-                                <div className="block group border bg-gray-100 rounded-lg shadow-sm overflow-hidden cursor-not-allowed opacity-80">
-                                  {/* Room number header */}
-                                  <div className="bg-gray-100 border-b text-gray-500 py-1.5 px-2 font-medium flex justify-between items-center">
-                                    <span className="text-sm">{room.roomNumber}</span>
-                                    <BedDouble className="h-4 w-4" />
-                                  </div>
-                                  
-                                  {/* Room content */}
-                                  <div className="p-2">
-                                    {/* Status badge */}
-                                    <div className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium bg-gray-100 text-gray-500 border">
-                                      <BedDouble className="h-4 w-4" />
-                                      <span>{room.type || 'Daire'}</span>
-                                    </div>
-                                    
-                                    {/* Price */}
-                                    <div className="mt-2 flex items-center justify-between">
-                                      <div className="flex items-center gap-1 text-sm font-medium text-gray-500">
-                                        <DollarSign className="h-3.5 w-3.5" />
-                                        <span>${(room.price / 1000).toFixed(0)}k</span>
-                                      </div>
-                                      
-                                      {/* Action button */}
-                                      <div className="rounded-full p-1 bg-gray-200">
-                                        <Calendar className="h-3.5 w-3.5 text-gray-500" />
-                                      </div>
-                                    </div>
-                                  </div>
-                                </div>
+                    
+                    return (
+                      <Card 
+                        key={`room-card-${room.id}`} 
+                        className={`overflow-hidden ${statusBg} ${statusBorder}`}
+                      >
+                        <div className={`py-2 px-3 ${statusBg} ${statusColor} border-b ${statusBorder} font-medium flex items-center justify-between`}>
+                          <div className="flex items-center gap-1">
+                            <div className="text-sm font-bold">{room.roomNumber}</div>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            {statusIcon}
+                          </div>
+                        </div>
+                        <CardContent className="p-3">
+                          <div className="flex flex-col gap-2">
+                            <div className="flex justify-between items-center">
+                              <span className="text-xs text-muted-foreground">Oda Tipi</span>
+                              <span className="text-sm font-medium">{room.type || '-'}</span>
+                            </div>
+                            <div className="flex justify-between items-center">
+                              <span className="text-xs text-muted-foreground">Boyut</span>
+                              <span className="text-sm font-medium">{room.size ? `${room.size}m²` : '-'}</span>
+                            </div>
+                            <div className="flex justify-between items-center mt-1">
+                              <span className="text-xs text-muted-foreground">Durum</span>
+                              <Badge className={`${statusBg} ${statusColor} border ${statusBorder}`}>
+                                {room.status === 'available' ? 'Müsait' : 
+                                 room.status === 'reserved' ? 'Rezerve' : 
+                                 room.status === 'sold' ? 'Satıldı' : '-'}
+                              </Badge>
+                            </div>
+                            
+                            {/* Durum bazlı işlem butonları */}
+                            <div className="mt-3 pt-2 border-t">
+                              {room.status === 'available' && (
+                                <Button 
+                                  size="sm" 
+                                  variant="outline" 
+                                  className="w-full text-green-700 border-green-200 bg-green-50 hover:bg-green-100 hover:text-green-800"
+                                  onClick={() => {
+                                    // Yeni satış kaydı sayfasına yönlendir
+                                    navigate(`/projects/${project.id}/new-sale?roomId=${room.id}`)
+                                  }}
+                                >
+                                  <PlusCircle className="h-4 w-4 mr-1" />
+                                  Yeni Satış Kaydı
+                                </Button>
                               )}
-                            </TooltipTrigger>
-                            <TooltipContent side="top" className="p-0 border-0">
-                              <RoomTooltip 
-                                room={room} 
-                                isAvailableForPeriod={room.status === 'available' && isRoomAvailableBetweenDates(room.id, startDateFilter, endDateFilter)}
-                                isDateFilterApplied={isDateFilterApplied}
-                                startDate={startDateFilter}
-                                endDate={endDateFilter}
-                              />
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                        );
-                      })}
-                    </div>
-                  ) : (
-                    <div className="text-center py-8 text-muted-foreground">
-                      Kriterlerinize uygun herhangi bir oda bulunamadı!
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </TabsContent>
-          ))}
-        </Tabs>
-      
+                              
+                              {room.status === 'reserved' && (
+                                <Button 
+                                  size="sm" 
+                                  variant="outline" 
+                                  className="w-full text-amber-700 border-amber-200 bg-amber-50 hover:bg-amber-100 hover:text-amber-800"
+                                  onClick={() => {
+                                    // Müşteri bilgilerini güncelleme işlemi
+                                    alert(`${room.roomNumber} numaralı oda için müşteri bilgileri güncellenecek`);
+                                    // Burada müşteri bilgileri formuna yönlendirme yapılabilir
+                                  }}
+                                >
+                                  <UserCog className="h-4 w-4 mr-1" />
+                                  Satışı Güncelle
+                                </Button>
+                              )}
+                              
+                              {room.status === 'sold' && (
+                                <Button 
+                                  size="sm" 
+                                  variant="outline" 
+                                  className="w-full text-blue-700 border-blue-200 bg-blue-50 hover:bg-blue-100 hover:text-blue-800"
+                                  onClick={() => {
+                                    // Satış kaydını görüntüleme işlemi
+                                    alert(`${room.roomNumber} numaralı oda için satış kaydı görüntülenecek`);
+                                    // Burada satış kaydı detaylarına yönlendirme yapılabilir
+                                  }}
+                                >
+                                  <FileText className="h-4 w-4 mr-1" />
+                                  Satışı Görüntüle
+                                </Button>
+                              )}
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
         {/* YouTube Video Dialog */}
         <YoutubeVideoDialog
           project={project}

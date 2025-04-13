@@ -153,26 +153,43 @@ export const MOCK_PROJECTS: Project[] = [
       "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=2070&auto=format&fit=crop"
     ],
     houses: [
-      { id: "3-1", name: "Anemon", projectId: "3", floorCount: 2, roomCount: 8 },
-      { id: "3-2", name: "Acelya", projectId: "3", floorCount: 2, roomCount: 8 },
-      { id: "3-3", name: "Orkide", projectId: "3", floorCount: 3, roomCount: 12 },
-      { id: "3-4", name: "Menekse", projectId: "3", floorCount: 1, roomCount: 8 },
-      { id: "3-5", name: "Gül", projectId: "3", floorCount: 2, roomCount: 8 },
-      { id: "3-6", name: "Lale", projectId: "3", floorCount: 3, roomCount: 10 },
-      { id: "3-7", name: "Zambak", projectId: "3", floorCount: 2, roomCount: 10 },
-      { id: "3-8", name: "Yasemin", projectId: "3", floorCount: 2, roomCount: 8 },
-      { id: "3-9", name: "Lavanta", projectId: "3", floorCount: 2, roomCount: 8 },
-      { id: "3-10", name: "Akasya", projectId: "3", floorCount: 2, roomCount: 10 },
-      { id: "3-11", name: "Begonvil", projectId: "3", floorCount: 2, roomCount: 8 },
-      { id: "3-12", name: "Hanmeli", projectId: "3", floorCount: 3, roomCount: 8 },
-      { id: "3-13", name: "Kaktus", projectId: "3", floorCount: 2, roomCount: 8 },
-      { id: "3-14", name: "Narçiçeği", projectId: "3", floorCount: 2, roomCount: 8 },
-      { id: "3-15", name: "Mimoza", projectId: "3", floorCount: 2, roomCount: 8 },
-      { id: "3-16", name: "Mango", projectId: "3", floorCount: 2, roomCount: 8 },
-      { id: "3-17", name: "Fesleğen", projectId: "3", floorCount: 2, roomCount: 8 },
-      { id: "3-18", name: "Petunya", projectId: "3", floorCount: 2, roomCount: 8 },
-      { id: "3-19", name: "Manolya", projectId: "3", floorCount: 3, roomCount: 8 },
-      { id: "3-20", name: "Nilüfer", projectId: "3", floorCount: 2, roomCount: 8 },
+      { id: "3-1", name: "Manolya", projectId: "3", floorCount: 3, roomCount: 10 },
+      { id: "3-2", name: "Mango", projectId: "3", floorCount: 3, roomCount: 10 },
+      { id: "3-3", name: "Mimoza", projectId: "3", floorCount: 3, roomCount: 10 },
+      { id: "3-4", name: "Nilüfer", projectId: "3", floorCount: 3, roomCount: 10 },
+      { id: "3-5", name: "Nergis", projectId: "3", floorCount: 3, roomCount: 10 },
+      { id: "3-6", name: "Fesleğen", projectId: "3", floorCount: 3, roomCount: 10 },
+      { id: "3-7", name: "Fulya", projectId: "3", floorCount: 3, roomCount: 10 },
+      { id: "3-8", name: "Frezya", projectId: "3", floorCount: 3, roomCount: 10 },
+      { id: "3-9", name: "Laden", projectId: "3", floorCount: 3, roomCount: 10 },
+      { id: "3-10", name: "Lale", projectId: "3", floorCount: 3, roomCount: 10 },
+      { id: "3-11", name: "Lilyum", projectId: "3", floorCount: 3, roomCount: 10 },
+
+      { id: "3-12", name: "Kardelen", projectId: "3", floorCount: 4, roomCount: 12 },
+      { id: "3-13", name: "Karanfil", projectId: "3", floorCount: 4, roomCount: 12 },
+      { id: "3-14", name: "Kamelya", projectId: "3", floorCount: 4, roomCount: 12 },
+      { id: "3-15", name: "Sedir", projectId: "3", floorCount: 4, roomCount: 12 },
+      { id: "3-16", name: "Safran", projectId: "3", floorCount: 4, roomCount: 12 },
+      { id: "3-17", name: "Sardunya", projectId: "3", floorCount: 4, roomCount: 12 },
+      { id: "3-18", name: "Sümbül", projectId: "3", floorCount: 4, roomCount: 12 },
+      { id: "3-19", name: "Sekoya", projectId: "3", floorCount: 4, roomCount: 12 },
+      { id: "3-20", name: "Papatya", projectId: "3", floorCount: 4, roomCount: 12 },
+      { id: "3-21", name: "Petunya", projectId: "3", floorCount: 4, roomCount: 12 },
+      { id: "3-22", name: "Arguvan", projectId: "3", floorCount: 4, roomCount: 12 },
+      { id: "3-23", name: "Anemon", projectId: "3", floorCount: 4, roomCount: 12 },
+      { id: "3-24", name: "Açelya", projectId: "3", floorCount: 4, roomCount: 12 },
+      { id: "3-25", name: "Akasya", projectId: "3", floorCount: 4, roomCount: 12 },
+      { id: "3-26", name: "Ardıç", projectId: "3", floorCount: 4, roomCount: 12 },
+      { id: "3-27", name: "Yonca", projectId: "3", floorCount: 4, roomCount: 12 },
+      { id: "3-28", name: "Yasemin", projectId: "3", floorCount: 4, roomCount: 12 },
+      { id: "3-29", name: "Zambak", projectId: "3", floorCount: 4, roomCount: 12 },
+      { id: "3-30", name: "Zerdali", projectId: "3", floorCount: 4, roomCount: 12 },
+      { id: "3-31", name: "Zencefil", projectId: "3", floorCount: 4, roomCount: 12 },
+      { id: "3-32", name: "Zakkum", projectId: "3", floorCount: 4, roomCount: 12 },
+      { id: "3-33", name: "Gardenya", projectId: "3", floorCount: 4, roomCount: 12 },
+      { id: "3-34", name: "Gelincik", projectId: "3", floorCount: 4, roomCount: 12 },
+      { id: "3-35", name: "Gonca", projectId: "3", floorCount: 4, roomCount: 12 },
+
     ]
   },
   {
@@ -209,32 +226,36 @@ export const MOCK_PROJECTS: Project[] = [
 ];
 
 // Define specific floor configurations for each project
-const projectFloorConfigs = {
+export const projectFloorConfigs = {
   // Sarot Palace (id: "1") - specific floor configuration based on the floor plan images
   "1": [
-    { floor: 1, floorName: "A KATI", roomsPerFloor: 36, types: ['1+1', '2+1', '3+1'] },   // Giriş Kat (Ground Floor)
-    { floor: 2, floorName: "A1 KATI", roomsPerFloor: 36, types: ['1+1', '2+1', '3+1'] },  // A1 Floor
-    { floor: 3, floorName: "B KATI", roomsPerFloor: 36, types: ['1+1', '2+1', '3+1'] },   // 1st Floor
-    { floor: 4, floorName: "C KATI", roomsPerFloor: 36, types: ['2+1', '3+1'] },        // 2nd Floor
-    { floor: 5, floorName: "D KATI", roomsPerFloor: 36, types: ['2+1', '3+1'] },        // 3rd Floor
-    { floor: 6, floorName: "E KATI", roomsPerFloor: 36, types: ['3+1', '4+1'] },        // 4th Floor
-    { floor: 7, floorName: "F KATI", roomsPerFloor: 36, types: ['3+1', '4+1'] },        // 5th Floor
-    { floor: 8, floorName: "PENTHOUSE", roomsPerFloor: 12, types: ['4+1', '5+1'] }      // 6th Floor (VIP PENTHOUSE)
+    { floor: "A", floorName: "A KATI", roomsPerFloor: 50, types: ['1+1', '2+1', '3+1'] },
+    { floor: "A1", floorName: "A1 KATI", roomsPerFloor: 50, types: ['1+1', '2+1'] },
+    { floor: "B", floorName: "B KATI", roomsPerFloor: 50, types: ['2+1', '3+1'] },
+    { floor: "C", floorName: "C KATI", roomsPerFloor: 50, types: ['1+1', '2+1'] },
+    { floor: "D", floorName: "D KATI", roomsPerFloor: 50, types: ['2+1', '3+1'] },
+    { floor: "E", floorName: "E KATI", roomsPerFloor: 50, types: ['1+1', '3+1'] },
+    { floor: "F", floorName: "F KATI", roomsPerFloor: 50, types: ['2+1'] },
+    { floor: "P", floorName: "PENTHOUSE KATI", roomsPerFloor: 50, types: ['3+1', '4+1'] },
   ],
   // Sarot Teras Evler (id: "2") - specific floor configuration
   "2": [
-    { floor: 1, roomsPerFloor: 40, types: ['1+1'] },
-    { floor: 2, roomsPerFloor: 40, types: ['2+1'] },
-    { floor: 3, roomsPerFloor: 40, types: ['2+1', '2+1'] },
-    { floor: 4, roomsPerFloor: 40, types: ['2+1'] },
-    { floor: 5, roomsPerFloor: 40, types: ['2+1', '2+1'] },
-    { floor: 6, roomsPerFloor: 40, types: ['1+1'] },
-    { floor: 7, roomsPerFloor: 40, types: ['1+1', '2+1'] },
-    { floor: 8, roomsPerFloor: 40, types: ['1+1'] }
+    { floor: "G", floorName: "G KATI",roomsPerFloor: 40, types: ['1+1', '2+1']},
+    { floor: "H", floorName: "H KATI", roomsPerFloor: 40, types: ['1+1'] },
+    { floor: "I", floorName: "I KATI", roomsPerFloor: 40, types: ['1+1', '2+1'] },
+    { floor: "J", floorName: "J KATI", roomsPerFloor: 40, types: ['1+1'] },
   ],
   // Sarot Termal Country (id: "4") - specific floor configuration
   "4": [
-    { floor: 1, roomsPerFloor: 10, types: ['2+1', '3+1'] },
+    { floor: "A", floorName: "Country A", roomsPerFloor: 34, types: ['2+1'] },
+    { floor: "B", floorName: "Country B", roomsPerFloor: 43, types: ['2+1'] },
+    { floor: "C", floorName: "Country C", roomsPerFloor: 42, types: ['2+1'] },
+    { floor: "D", floorName: "Country D", roomsPerFloor: 18, types: ['2+1'] },
+    { floor: "V", floorName: "Country V", roomsPerFloor: 17, types: ['2+1'] },
+    { floor: "E", floorName: "Country E", roomsPerFloor: 17, types: ['2+1'] },
+    { floor: "F", floorName: "Country F", roomsPerFloor: 12, types: ['2+1'] },
+    { floor: "G", floorName: "Country G", roomsPerFloor: 12, types: ['2+1'] },
+    { floor: "H", floorName: "Country H", roomsPerFloor: 9, types: ['2+1'] },
   ],
   // Burj-Al Babas (id: "5") - specific floor configuration
   "5": [
@@ -245,89 +266,209 @@ const projectFloorConfigs = {
 // Define specific floor configurations for houses in Sarot Termal Vadi (id: "3")
 const sarotTermalVadiHouseFloorConfigs = {
   // Each house will have its own floor configuration with unique floor names and room types
-  "3-1": [ // Anemon House
-    { floor: 1, floorName: "Zemin Kat", roomsPerFloor: 5, types: ['1+1', '2+1'] },
-    { floor: 2, floorName: "Üst Kat", roomsPerFloor: 3, types: ['3+1', '4+1'] }
+  "3-1": [ // Manolya House
+    { floor: 1, floorName: "Bahçe Kat", roomsPerFloor: 2, types: ['2+1'] },
+    { floor: 2, floorName: "1. Kat", roomsPerFloor: 4, types: ['1+1'] },
+    { floor: 3, floorName: "2. Kat", roomsPerFloor: 4, types: ['1+1'] }
   ],
-  "3-2": [ // Acelya House
-    { floor: 1, floorName: "Giriş Kat", roomsPerFloor: 4, types: ['2+1'] },
-    { floor: 2, floorName: "Birinci Kat", roomsPerFloor: 4, types: ['2+1', '3+1'] }
+  "3-2": [ // Mango House
+    { floor: 1, floorName: "Bahçe Kat", roomsPerFloor: 2, types: ['2+1'] },
+    { floor: 2, floorName: "1. Kat", roomsPerFloor: 4, types: ['1+1'] },
+    { floor: 3, floorName: "2. Kat", roomsPerFloor: 4, types: ['1+1'] }
   ],
-  "3-3": [ // Orkide House
-    { floor: 1, floorName: "Alt Kat", roomsPerFloor: 6, types: ['1+1'] },
-    { floor: 2, floorName: "Orta Kat", roomsPerFloor: 4, types: ['2+1'] },
-    { floor: 3, floorName: "Üst Kat", roomsPerFloor: 2, types: ['4+1'] }
+  "3-3": [ // Mimoza House
+    { floor: 1, floorName: "Bahçe Kat", roomsPerFloor: 2, types: ['2+1'] },
+    { floor: 2, floorName: "1. Kat", roomsPerFloor: 4, types: ['1+1'] },
+    { floor: 3, floorName: "2. Kat", roomsPerFloor: 4, types: ['1+1'] }
   ],
-  "3-4": [ // Menekse House
-    { floor: 1, floorName: "A Blok", roomsPerFloor: 8, types: ['1+1', '2+1'] }
+  "3-4": [ // Nilüfer House
+    { floor: 1, floorName: "Bahçe Kat", roomsPerFloor: 2, types: ['2+1'] },
+    { floor: 2, floorName: "1. Kat", roomsPerFloor: 4, types: ['1+1'] },
+    { floor: 3, floorName: "2. Kat", roomsPerFloor: 4, types: ['1+1'] }
   ],
-  "3-5": [ // Gül House
-    { floor: 1, floorName: "Bahçe Katı", roomsPerFloor: 3, types: ['2+1'] },
-    { floor: 2, floorName: "Ana Kat", roomsPerFloor: 5, types: ['3+1'] }
+  "3-5": [ // Nergis House
+    { floor: 1, floorName: "Bahçe Kat", roomsPerFloor: 2, types: ['2+1'] },
+    { floor: 2, floorName: "1. Kat", roomsPerFloor: 4, types: ['1+1'] },
+    { floor: 3, floorName: "2. Kat", roomsPerFloor: 4, types: ['1+1'] }
   ],
-  "3-6": [ // Lale House
-    { floor: 1, floorName: "Giriş", roomsPerFloor: 4, types: ['2+1'] },
-    { floor: 2, floorName: "Orta", roomsPerFloor: 4, types: ['2+1'] },
-    { floor: 3, floorName: "Teras", roomsPerFloor: 2, types: ['3+1', '4+1'] }
+  "3-6": [ // Fesleğen House
+    { floor: 1, floorName: "Bahçe Kat", roomsPerFloor: 2, types: ['2+1'] },
+    { floor: 2, floorName: "1. Kat", roomsPerFloor: 4, types: ['1+1'] },
+    { floor: 3, floorName: "2. Kat", roomsPerFloor: 4, types: ['1+1'] }
   ],
-  "3-7": [ // Zambak House
-    { floor: 1, floorName: "A Katı", roomsPerFloor: 6, types: ['1+1'] },
-    { floor: 2, floorName: "B Katı", roomsPerFloor: 4, types: ['2+1'] }
+  "3-7": [ // Fulya House
+    { floor: 1, floorName: "Bahçe Kat", roomsPerFloor: 2, types: ['2+1'] },
+    { floor: 2, floorName: "1. Kat", roomsPerFloor: 4, types: ['1+1'] },
+    { floor: 3, floorName: "2. Kat", roomsPerFloor: 4, types: ['1+1'] }
   ],
-  "3-8": [ // Yasemin House
-    { floor: 1, floorName: "Zemin", roomsPerFloor: 4, types: ['2+1', '3+1'] },
-    { floor: 2, floorName: "Üst", roomsPerFloor: 4, types: ['3+1'] }
+  "3-8": [ // Frezya House
+    { floor: 1, floorName: "Bahçe Kat", roomsPerFloor: 2, types: ['2+1'] },
+    { floor: 2, floorName: "1. Kat", roomsPerFloor: 4, types: ['1+1'] },
+    { floor: 3, floorName: "2. Kat", roomsPerFloor: 4, types: ['1+1'] }
   ],
-  "3-9": [ // Lavanta House
-    { floor: 1, floorName: "Alt Seviye", roomsPerFloor: 5, types: ['1+1', '2+1'] },
-    { floor: 2, floorName: "Üst Seviye", roomsPerFloor: 3, types: ['3+1', '4+1'] }
+  "3-9": [ // Laden House
+    { floor: 1, floorName: "Bahçe Kat", roomsPerFloor: 2, types: ['2+1'] },
+    { floor: 2, floorName: "1. Kat", roomsPerFloor: 4, types: ['1+1'] },
+    { floor: 3, floorName: "2. Kat", roomsPerFloor: 4, types: ['1+1'] }
   ],
-  "3-10": [ // Akasya House
-    { floor: 1, floorName: "Bahçe", roomsPerFloor: 6, types: ['1+1'] },
-    { floor: 2, floorName: "Ana", roomsPerFloor: 4, types: ['2+1'] }
+  "3-10": [ // Lale House
+    { floor: 1, floorName: "Bahçe Kat", roomsPerFloor: 2, types: ['2+1'] },
+    { floor: 2, floorName: "1. Kat", roomsPerFloor: 4, types: ['1+1'] },
+    { floor: 3, floorName: "2. Kat", roomsPerFloor: 4, types: ['1+1'] }
   ],
-  "3-11": [ // Begonvil House
-    { floor: 1, floorName: "Giriş Seviyesi", roomsPerFloor: 4, types: ['2+1'] },
-    { floor: 2, floorName: "Üst Seviye", roomsPerFloor: 4, types: ['3+1'] }
+  "3-11": [ // Lilyum House
+    { floor: 1, floorName: "Bahçe Kat", roomsPerFloor: 2, types: ['2+1'] },
+    { floor: 2, floorName: "1. Kat", roomsPerFloor: 4, types: ['1+1'] },
+    { floor: 3, floorName: "2. Kat", roomsPerFloor: 4, types: ['1+1'] }
   ],
-  "3-12": [ // Hanmeli House
-    { floor: 1, floorName: "Alt", roomsPerFloor: 3, types: ['1+1', '2+1'] },
-    { floor: 2, floorName: "Orta", roomsPerFloor: 3, types: ['2+1'] },
-    { floor: 3, floorName: "Üst", roomsPerFloor: 2, types: ['3+1'] }
+  // These are the 4 floor house configs
+  "3-12": [ // Kardelen House
+    { floor: 1, floorName: "Bahçe Kat", roomsPerFloor: 2, types: ['2+1'] },
+    { floor: 2, floorName: "1. Kat", roomsPerFloor: 4, types: ['1+1'] },
+    { floor: 3, floorName: "2. Kat", roomsPerFloor: 4, types: ['1+1'] },
+    { floor: 4, floorName: "3. Kat", roomsPerFloor: 2, types: ['3+1'] }
   ],
-  "3-13": [ // Kaktus House
-    { floor: 1, floorName: "Zemin Seviye", roomsPerFloor: 5, types: ['1+1', '2+1'] },
-    { floor: 2, floorName: "Birinci Seviye", roomsPerFloor: 3, types: ['3+1'] }
+  "3-13": [ // Karanfil House
+    { floor: 1, floorName: "Bahçe Kat", roomsPerFloor: 2, types: ['2+1'] },
+    { floor: 2, floorName: "1. Kat", roomsPerFloor: 4, types: ['1+1'] },
+    { floor: 3, floorName: "2. Kat", roomsPerFloor: 4, types: ['1+1'] },
+    { floor: 4, floorName: "3. Kat", roomsPerFloor: 2, types: ['3+1'] }
   ],
-  "3-14": [ // Narçiçeği House
-    { floor: 1, floorName: "Giriş Bölümü", roomsPerFloor: 4, types: ['2+1'] },
-    { floor: 2, floorName: "Üst Bölüm", roomsPerFloor: 4, types: ['2+1', '3+1'] }
+  "3-14": [ // Kamelya House
+    { floor: 1, floorName: "Bahçe Kat", roomsPerFloor: 2, types: ['2+1'] },
+    { floor: 2, floorName: "1. Kat", roomsPerFloor: 4, types: ['1+1'] },
+    { floor: 3, floorName: "2. Kat", roomsPerFloor: 4, types: ['1+1'] },
+    { floor: 4, floorName: "3. Kat", roomsPerFloor: 2, types: ['3+1'] }
   ],
-  "3-15": [ // Mimoza House
-    { floor: 1, floorName: "Alt Kısım", roomsPerFloor: 6, types: ['1+1'] },
-    { floor: 2, floorName: "Üst Kısım", roomsPerFloor: 2, types: ['3+1', '4+1'] }
+  "3-15": [ // Sedir House
+    { floor: 1, floorName: "Bahçe Kat", roomsPerFloor: 2, types: ['2+1'] },
+    { floor: 2, floorName: "1. Kat", roomsPerFloor: 4, types: ['1+1'] },
+    { floor: 3, floorName: "2. Kat", roomsPerFloor: 4, types: ['1+1'] },
+    { floor: 4, floorName: "3. Kat", roomsPerFloor: 2, types: ['3+1'] }
   ],
-  "3-16": [ // Mango House
-    { floor: 1, floorName: "Bahçe Seviyesi", roomsPerFloor: 4, types: ['2+1'] },
-    { floor: 2, floorName: "Ana Seviye", roomsPerFloor: 4, types: ['2+1', '3+1'] }
+  "3-16": [ // Safran House
+    { floor: 1, floorName: "Bahçe Seviyesi", roomsPerFloor: 2, types: ['2+1'] },
+    { floor: 2, floorName: "1. Kat", roomsPerFloor: 4, types: ['1+1'] },
+    { floor: 3, floorName: "2. Kat", roomsPerFloor: 4, types: ['1+1'] },
+    { floor: 4, floorName: "3. Kat", roomsPerFloor: 2, types: ['3+1'] }
   ],
-  "3-17": [ // Fesleğen House
-    { floor: 1, floorName: "Alt Bölüm", roomsPerFloor: 5, types: ['1+1', '2+1'] },
-    { floor: 2, floorName: "Üst Bölüm", roomsPerFloor: 3, types: ['3+1'] }
+  "3-17": [ // Sardunya House
+    { floor: 1, floorName: "Bahçe Seviyesi", roomsPerFloor: 2, types: ['2+1'] },
+    { floor: 2, floorName: "1. Kat", roomsPerFloor: 4, types: ['1+1'] },
+    { floor: 3, floorName: "2. Kat", roomsPerFloor: 4, types: ['1+1'] },
+    { floor: 4, floorName: "3. Kat", roomsPerFloor: 2, types: ['3+1'] }
   ],
-  "3-18": [ // Petunya House
-    { floor: 1, floorName: "Zemin", roomsPerFloor: 4, types: ['2+1'] },
-    { floor: 2, floorName: "Birinci", roomsPerFloor: 4, types: ['3+1'] }
+  "3-18": [ // Sümbül House
+    { floor: 1, floorName: "Bahçe Seviyesi", roomsPerFloor: 2, types: ['2+1'] },
+    { floor: 2, floorName: "1. Kat", roomsPerFloor: 4, types: ['1+1'] },
+    { floor: 3, floorName: "2. Kat", roomsPerFloor: 4, types: ['1+1'] },
+    { floor: 4, floorName: "3. Kat", roomsPerFloor: 2, types: ['3+1'] }
   ],
-  "3-19": [ // Manolya House
-    { floor: 1, floorName: "Alt Kat", roomsPerFloor: 3, types: ['1+1', '2+1'] },
-    { floor: 2, floorName: "Orta Kat", roomsPerFloor: 3, types: ['2+1'] },
-    { floor: 3, floorName: "Üst Kat", roomsPerFloor: 2, types: ['3+1', '4+1'] }
+  "3-19": [ // Sekoya House
+    { floor: 1, floorName: "Bahçe Seviyesi", roomsPerFloor: 2, types: ['2+1'] },
+    { floor: 2, floorName: "1. Kat", roomsPerFloor: 4, types: ['1+1'] },
+    { floor: 3, floorName: "2. Kat", roomsPerFloor: 4, types: ['1+1'] },
+    { floor: 4, floorName: "3. Kat", roomsPerFloor: 2, types: ['3+1'] }
   ],
-  "3-20": [ // Nilüfer House
-    { floor: 1, floorName: "Giriş Katı", roomsPerFloor: 4, types: ['2+1'] },
-    { floor: 2, floorName: "Üst Katı", roomsPerFloor: 4, types: ['3+1'] }
-  ]
+  "3-20": [ // Papatya House
+    { floor: 1, floorName: "Bahçe Seviyesi", roomsPerFloor: 2, types: ['2+1'] },
+    { floor: 2, floorName: "1. Kat", roomsPerFloor: 4, types: ['1+1'] },
+    { floor: 3, floorName: "2. Kat", roomsPerFloor: 4, types: ['1+1'] },
+    { floor: 4, floorName: "3. Kat", roomsPerFloor: 2, types: ['3+1'] }
+  ],
+  "3-21": [ // Petunya House
+    { floor: 1, floorName: "Bahçe Seviyesi", roomsPerFloor: 2, types: ['2+1'] },
+    { floor: 2, floorName: "1. Kat", roomsPerFloor: 4, types: ['1+1'] },
+    { floor: 3, floorName: "2. Kat", roomsPerFloor: 4, types: ['1+1'] },
+    { floor: 4, floorName: "3. Kat", roomsPerFloor: 2, types: ['3+1'] }
+  ],
+  "3-22": [ // Arguvan House
+    { floor: 1, floorName: "Bahçe Seviyesi", roomsPerFloor: 2, types: ['2+1'] },
+    { floor: 2, floorName: "1. Kat", roomsPerFloor: 4, types: ['1+1'] },
+    { floor: 3, floorName: "2. Kat", roomsPerFloor: 4, types: ['1+1'] },
+    { floor: 4, floorName: "3. Kat", roomsPerFloor: 2, types: ['3+1'] }
+  ],
+  "3-23": [ // Anemon House
+    { floor: 1, floorName: "Bahçe Seviyesi", roomsPerFloor: 2, types: ['2+1'] },
+    { floor: 2, floorName: "1. Kat", roomsPerFloor: 4, types: ['1+1'] },
+    { floor: 3, floorName: "2. Kat", roomsPerFloor: 4, types: ['1+1'] },
+    { floor: 4, floorName: "3. Kat", roomsPerFloor: 2, types: ['3+1'] }
+  ],
+  "3-24": [ // Açelya House
+    { floor: 1, floorName: "Bahçe Seviyesi", roomsPerFloor: 2, types: ['2+1'] },
+    { floor: 2, floorName: "1. Kat", roomsPerFloor: 4, types: ['1+1'] },
+    { floor: 3, floorName: "2. Kat", roomsPerFloor: 4, types: ['1+1'] },
+    { floor: 4, floorName: "3. Kat", roomsPerFloor: 2, types: ['3+1'] }
+  ],
+  "3-25": [ // Akasya House
+    { floor: 1, floorName: "Bahçe Seviyesi", roomsPerFloor: 2, types: ['2+1'] },
+    { floor: 2, floorName: "1. Kat", roomsPerFloor: 4, types: ['1+1'] },
+    { floor: 3, floorName: "2. Kat", roomsPerFloor: 4, types: ['1+1'] },
+    { floor: 4, floorName: "3. Kat", roomsPerFloor: 2, types: ['3+1'] }
+  ],
+  "3-26": [ // Ardıç House
+    { floor: 1, floorName: "Bahçe Seviyesi", roomsPerFloor: 2, types: ['2+1'] },
+    { floor: 2, floorName: "1. Kat", roomsPerFloor: 4, types: ['1+1'] },
+    { floor: 3, floorName: "2. Kat", roomsPerFloor: 4, types: ['1+1'] },
+    { floor: 4, floorName: "3. Kat", roomsPerFloor: 2, types: ['3+1'] }
+  ],
+  "3-27": [ // Yonca House
+    { floor: 1, floorName: "Bahçe Seviyesi", roomsPerFloor: 2, types: ['2+1'] },
+    { floor: 2, floorName: "1. Kat", roomsPerFloor: 4, types: ['1+1'] },
+    { floor: 3, floorName: "2. Kat", roomsPerFloor: 4, types: ['1+1'] },
+    { floor: 4, floorName: "3. Kat", roomsPerFloor: 2, types: ['3+1'] }
+  ],
+  "3-28": [ // Yasemin House
+    { floor: 1, floorName: "Bahçe Seviyesi", roomsPerFloor: 2, types: ['2+1'] },
+    { floor: 2, floorName: "1. Kat", roomsPerFloor: 4, types: ['1+1'] },
+    { floor: 3, floorName: "2. Kat", roomsPerFloor: 4, types: ['1+1'] },
+    { floor: 4, floorName: "3. Kat", roomsPerFloor: 2, types: ['3+1'] }
+  ],
+  "3-29": [ // Zambak House
+    { floor: 1, floorName: "Bahçe Seviyesi", roomsPerFloor: 2, types: ['2+1'] },
+    { floor: 2, floorName: "1. Kat", roomsPerFloor: 4, types: ['1+1'] },
+    { floor: 3, floorName: "2. Kat", roomsPerFloor: 4, types: ['1+1'] },
+    { floor: 4, floorName: "3. Kat", roomsPerFloor: 2, types: ['3+1'] }
+  ],
+  "3-30": [ // Zerdali House
+    { floor: 1, floorName: "Bahçe Seviyesi", roomsPerFloor: 2, types: ['2+1'] },
+    { floor: 2, floorName: "1. Kat", roomsPerFloor: 4, types: ['1+1'] },
+    { floor: 3, floorName: "2. Kat", roomsPerFloor: 4, types: ['1+1'] },
+    { floor: 4, floorName: "3. Kat", roomsPerFloor: 2, types: ['3+1'] }
+  ],
+  "3-31": [ // Zencefil House
+    { floor: 1, floorName: "Bahçe Seviyesi", roomsPerFloor: 2, types: ['2+1'] },
+    { floor: 2, floorName: "1. Kat", roomsPerFloor: 4, types: ['1+1'] },
+    { floor: 3, floorName: "2. Kat", roomsPerFloor: 4, types: ['1+1'] },
+    { floor: 4, floorName: "3. Kat", roomsPerFloor: 2, types: ['3+1'] }
+  ],
+  "3-32": [ // Zakkum House
+    { floor: 1, floorName: "Bahçe Seviyesi", roomsPerFloor: 2, types: ['2+1'] },
+    { floor: 2, floorName: "1. Kat", roomsPerFloor: 4, types: ['1+1'] },
+    { floor: 3, floorName: "2. Kat", roomsPerFloor: 4, types: ['1+1'] },
+    { floor: 4, floorName: "3. Kat", roomsPerFloor: 2, types: ['3+1'] }
+  ],
+  "3-33": [ // Gardenya House
+    { floor: 1, floorName: "Bahçe Seviyesi", roomsPerFloor: 2, types: ['2+1'] },
+    { floor: 2, floorName: "1. Kat", roomsPerFloor: 4, types: ['1+1'] },
+    { floor: 3, floorName: "2. Kat", roomsPerFloor: 4, types: ['1+1'] },
+    { floor: 4, floorName: "3. Kat", roomsPerFloor: 2, types: ['3+1'] }
+  ],  
+  "3-34": [ // Gelincik House
+    { floor: 1, floorName: "Bahçe Seviyesi", roomsPerFloor: 2, types: ['2+1'] },
+    { floor: 2, floorName: "1. Kat", roomsPerFloor: 4, types: ['1+1'] },
+    { floor: 3, floorName: "2. Kat", roomsPerFloor: 4, types: ['1+1'] },
+    { floor: 4, floorName: "3. Kat", roomsPerFloor: 2, types: ['3+1'] }
+  ], 
+  "3-35": [ // Gonca House
+    { floor: 1, floorName: "Bahçe Seviyesi", roomsPerFloor: 2, types: ['2+1'] },
+    { floor: 2, floorName: "1. Kat", roomsPerFloor: 4, types: ['1+1'] },
+    { floor: 3, floorName: "2. Kat", roomsPerFloor: 4, types: ['1+1'] },
+    { floor: 4, floorName: "3. Kat", roomsPerFloor: 2, types: ['3+1'] }
+  ],
+  
+  
+  
 };
 
 // Function to generate rooms based on specific floor configuration
@@ -421,6 +562,7 @@ function generateRoomsWithConfig(projectId: string, floorConfig: any[], houseId?
 // Generate mock rooms for all projects and houses
 export const MOCK_ROOMS: Room[] = [];
 
+
 // Populate MOCK_ROOMS with rooms for each project and house
 (function populateMockRooms() {
   // Add rooms for projects with specific floor configurations
@@ -467,4 +609,3 @@ export const MOCK_ROOMS: Room[] = [];
     }
   });
 })();
-

@@ -6,6 +6,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
+import sarotLogo from '@/assets/sarot-termal.png';
 import { 
   Home, 
   BarChart3, 
@@ -84,10 +85,8 @@ export function Sidebar({ className }: SidebarProps) {
             className="flex items-center space-x-2 transition-all hover:opacity-80"
             onClick={() => setOpen(false)}
           >
-            <div className="rounded-md bg-black p-1">
-              <DollarSign className="h-6 w-6 text-white" />
-            </div>
-            <span className="font-semibold text-lg text-white">SAROT DİJİTAL PORTAL</span>
+            <DollarSign className="h-4 w-4" />
+            <span className="font-semibold text-lg text-white p-1 py-5">SAROT DİJİTAL PORTAL</span>
           </Link>
         </div>
 
@@ -98,7 +97,7 @@ export function Sidebar({ className }: SidebarProps) {
               to={item.href}
               onClick={() => setOpen(false)}
               className={cn(
-                "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-all hover:bg-sidebar-accent",
+                "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-all hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
                 item.active
                   ? "bg-sidebar-accent text-sidebar-accent-foreground"
                   : "text-sidebar-foreground/70 hover:text-sidebar-foreground"

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Search, X, CloudSnowIcon, Leaf, Wind, SunIcon, Home, BedDouble, BadgeCheck } from "lucide-react";
+import { Search, X, CloudSnowIcon, Leaf, Wind, SunIcon, Home, Calendar, Building2 } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -20,24 +20,28 @@ interface DateRangeFilterProps {
     endDate: Date | undefined, 
     season?: string,
     roomCount?: string,
-    roomType?: string,
+    roomType?: string, // Keeping for backward compatibility
     weekNumber?: string,
     donem?: string | string[],
-    donemType?: 'single' | 'multiple' | 'all'
+    donemType?: 'single' | 'multiple' | 'all',
+    floorType?: string
   ) => void;
   onFilterChange?: (filterInfo: {
     selectedDonems: string[];
     roomCount?: string;
-    roomType?: string;
+    floorType?: string;
   }) => void;
+  projectName?: string; // Proje adını ekledik
+  projectId?: string; // Proje ID'sini ekledik
 }
 
-export function DateRangeFilter({ onFilter, onFilterChange }: DateRangeFilterProps) {
+export function DateRangeFilter({ onFilter, onFilterChange, projectName = 'Sarot Palace', projectId = '1' }: DateRangeFilterProps) {
   const [roomCount, setRoomCount] = useState<string | undefined>(undefined);
-  const [roomType, setRoomType] = useState<string | undefined>(undefined);
+  // Removed roomType state as requested
   const [donemType, setDonemType] = useState<'single' | 'multiple' | 'all'>('multiple');
   const [selectedDonem, setSelectedDonem] = useState<string | undefined>(undefined);
   const [selectedDonems, setSelectedDonems] = useState<string[]>([]);
+  const [selectedFloorType, setSelectedFloorType] = useState<string>('penthouse');
 
   // Notify parent component when filters change
   useEffect(() => {
@@ -45,36 +49,54 @@ export function DateRangeFilter({ onFilter, onFilterChange }: DateRangeFilterPro
       onFilterChange({
         selectedDonems,
         roomCount,
-        roomType
+        floorType: selectedFloorType
       });
     }
-  }, [selectedDonems, roomCount, roomType, onFilterChange]);
+  }, [selectedDonems, roomCount, selectedFloorType, onFilterChange]);
 
   const handleClear = () => {
     setRoomCount(undefined);
-    setRoomType(undefined);
+    // Removed roomType reset as it's no longer needed
     setSelectedDonem(undefined);
     setSelectedDonems([]);
-    onFilter(undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined);
+    setSelectedFloorType('penthouse');
+    onFilter(undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined);
   };
 
   const handleApplyFilter = () => {
     if (donemType === 'single') {
-      onFilter(undefined, undefined, undefined, roomCount, roomType, undefined, selectedDonem, 'single');
+      onFilter(undefined, undefined, undefined, roomCount, undefined, undefined, selectedDonem, 'single', selectedFloorType);
     } else if (donemType === 'multiple') {
       // Use the selectedDonems array for multiple individual selections
-      onFilter(undefined, undefined, undefined, roomCount, roomType, undefined, selectedDonems, 'multiple');
+      onFilter(undefined, undefined, undefined, roomCount, undefined, undefined, selectedDonems, 'multiple', selectedFloorType);
     } else { // 'all'
-      onFilter(undefined, undefined, undefined, roomCount, roomType, undefined, 'all', 'all');
+      onFilter(undefined, undefined, undefined, roomCount, undefined, undefined, 'all', 'all', selectedFloorType);
     }
   };
 
   // Helper function to calculate the date range for each dönem (week)
-  const calculateDonemDates = (donemNumber: number) => {
+  const calculateDonemDates = (donemNumber: number, floorType?: string) => {
     // Each dönem is approximately 7 days (1 week)
-    // Calculate the start date: January 1st + (donemNumber - 1) * 7 days
     const currentYear = new Date().getFullYear();
-    const startDate = new Date(currentYear, 0, 1 + (donemNumber - 1) * 7);
+    let startDate: Date;
+    
+    // For Sarot Palace, different floors have different starting dates
+    // Use the currently selected floor type if none is provided
+    const effectiveFloorType = floorType || selectedFloorType;
+    
+    if (effectiveFloorType === 'A-C') {
+      // A, A1, B, C floors start with December 30th of previous year
+      startDate = new Date(currentYear - 1, 11, 30); // December 30th of previous year
+    } else if (effectiveFloorType === 'D-F') {
+      // D, E, F floors start with December 31st of previous year
+      startDate = new Date(currentYear - 1, 11, 31); // December 31st of previous year
+    } else {
+      // Penthouse and other floors start with January 1st
+      startDate = new Date(currentYear, 0, 1); // January 1st of current year
+    }
+    
+    // Add (donemNumber - 1) * 7 days to the start date
+    startDate.setDate(startDate.getDate() + (donemNumber - 1) * 7);
     
     // Calculate the end date: start date + 6 days (to make a full week)
     const endDate = new Date(startDate);
@@ -174,10 +196,200 @@ export function DateRangeFilter({ onFilter, onFilterChange }: DateRangeFilterPro
   return (
     <Card className="mb-6">
       <CardHeader className="pb-3">
-        <CardTitle className="text-lg font-medium flex items-center gap-2">
-          <Search className="h-5 w-5" />
-          Konut Arama Filtreleri
-        </CardTitle>
+        <div className="mb-4">
+          <h3 className="text-base font-medium mb-3 flex items-center gap-2">
+            <Building2 className="h-5 w-5 text-blue-600" />
+            {projectName} Kat Tipi Seçimi
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            {/* Proje tiplerine göre farklı kat seçimleri göster */}
+            {projectId === '1' ? (
+              <>
+                {/* Sarot Palace için kat tipleri */}
+                <div 
+                  onClick={() => {
+                    setSelectedFloorType('A-C');
+                    // Notify parent component about floor type change
+                    if (onFilterChange) {
+                      onFilterChange({
+                        selectedDonems,
+                        roomCount,
+                        floorType: 'A-C'
+                      });
+                    }
+                  }}
+                  className={`border rounded-lg p-3 cursor-pointer transition-all ${
+                    selectedFloorType === 'A-C' 
+                      ? 'bg-blue-50 border-blue-300 shadow-sm ring-2 ring-blue-300' 
+                      : 'hover:bg-slate-100'
+                  }`}
+                >
+                  <div className="flex items-center gap-2 mb-1">
+                    <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-semibold">A</div>
+                    <h4 className="font-medium">A, A1, B, C Katları</h4>
+                  </div>
+                  <p className="text-xs text-slate-600 ml-10">Dönem başlangıcı: <span className="font-medium">30 Aralık</span></p>
+                </div>
+                
+                <div 
+                  onClick={() => {
+                    setSelectedFloorType('D-F');
+                    // Notify parent component about floor type change
+                    if (onFilterChange) {
+                      onFilterChange({
+                        selectedDonems,
+                        roomCount,
+                        floorType: 'D-F'
+                      });
+                    }
+                  }}
+                  className={`border rounded-lg p-3 cursor-pointer transition-all ${
+                    selectedFloorType === 'D-F' 
+                      ? 'bg-green-50 border-green-300 shadow-sm ring-2 ring-green-300' 
+                      : 'hover:bg-slate-100'
+                  }`}
+                >
+                  <div className="flex items-center gap-2 mb-1">
+                    <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center text-green-600 font-semibold">D</div>
+                    <h4 className="font-medium">D, E, F Katları</h4>
+                  </div>
+                  <p className="text-xs text-slate-600 ml-10">Dönem başlangıcı: <span className="font-medium">31 Aralık</span></p>
+                </div>
+                
+                <div 
+                  onClick={() => {
+                    setSelectedFloorType('penthouse');
+                    // Notify parent component about floor type change
+                    if (onFilterChange) {
+                      onFilterChange({
+                        selectedDonems,
+                        roomCount,
+                        floorType: 'penthouse'
+                      });
+                    }
+                  }}
+                  className={`border rounded-lg p-3 cursor-pointer transition-all ${
+                    selectedFloorType === 'penthouse' 
+                      ? 'bg-purple-50 border-purple-300 shadow-sm ring-2 ring-purple-300' 
+                      : 'hover:bg-slate-100'
+                  }`}
+                >
+                  <div className="flex items-center gap-2 mb-1">
+                    <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 font-semibold">P</div>
+                    <h4 className="font-medium">Penthouse</h4>
+                  </div>
+                  <p className="text-xs text-slate-600 ml-10">Dönem başlangıcı: <span className="font-medium">1 Ocak</span></p>
+                </div>
+              </>
+            ) : projectId === '2' ? (
+              <>
+                {/* Sarot Teras Evler için kat tipleri */}
+                
+                <div
+                  onClick={() => {
+                    setSelectedFloorType('I-J');
+                    if (onFilterChange) {
+                      onFilterChange({
+                        selectedDonems,
+                        roomCount,
+                        floorType: 'I-J'
+                      });
+                    }
+                  }}
+                  className={`border rounded-lg p-3 cursor-pointer transition-all ${
+                    selectedFloorType === 'I-J' 
+                      ? 'bg-cyan-50 border-cyan-300 shadow-sm ring-2 ring-cyan-300' 
+                      : 'hover:bg-slate-100'
+                  }`}
+                >
+                  <div className="flex items-center gap-2 mb-1">
+                    <div className="w-8 h-8 rounded-full bg-cyan-100 flex items-center justify-center text-cyan-600 font-semibold">I</div>
+                    <h4 className="font-medium">G, H, I, J Katları</h4>
+                  </div>
+                  <p className="text-xs text-slate-600 ml-10">Dönem başlangıcı: <span className="font-medium">31 Ocak</span></p>
+                </div>
+              </>
+            ) : projectId === '4' ? (
+              <>
+                {/* Sarot Termal Country için kat tipleri */}
+                <div
+                  onClick={() => {
+                    setSelectedFloorType('A-D-V');
+                    if (onFilterChange) {
+                      onFilterChange({
+                        selectedDonems,
+                        roomCount,
+                        floorType: 'A-D-V'
+                      });
+                    }
+                  }}
+                  className={`border rounded-lg p-3 cursor-pointer transition-all ${
+                    selectedFloorType === 'A-D-V' 
+                      ? 'bg-emerald-50 border-emerald-300 shadow-sm ring-2 ring-emerald-300' 
+                      : 'hover:bg-slate-100'
+                  }`}
+                >
+                  <div className="flex items-center gap-2 mb-1">
+                    <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 font-semibold">A</div>
+                    <h4 className="font-medium">A, B, C, D, V Katları</h4>
+                  </div>
+                  <p className="text-xs text-slate-600 ml-10">Country Blokları: <span className="font-medium">Grup 1</span></p>
+                </div>
+                
+                <div
+                  onClick={() => {
+                    setSelectedFloorType('E-H');
+                    if (onFilterChange) {
+                      onFilterChange({
+                        selectedDonems,
+                        roomCount,
+                        floorType: 'E-H'
+                      });
+                    }
+                  }}
+                  className={`border rounded-lg p-3 cursor-pointer transition-all ${
+                    selectedFloorType === 'E-H' 
+                      ? 'bg-purple-50 border-purple-300 shadow-sm ring-2 ring-purple-300' 
+                      : 'hover:bg-slate-100'
+                  }`}
+                >
+                  <div className="flex items-center gap-2 mb-1">
+                    <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 font-semibold">E</div>
+                    <h4 className="font-medium">E, F, G, H Katları</h4>
+                  </div>
+                  <p className="text-xs text-slate-600 ml-10">Country Blokları: <span className="font-medium">Grup 2</span></p>
+                </div>
+              </>
+            ) : (
+              <>
+                {/* Diğer projeler için varsayılan kat tipi */}
+                <div
+                  onClick={() => {
+                    setSelectedFloorType('all');
+                    if (onFilterChange) {
+                      onFilterChange({
+                        selectedDonems,
+                        roomCount,
+                        floorType: 'all'
+                      });
+                    }
+                  }}
+                  className={`border rounded-lg p-3 cursor-pointer transition-all ${
+                    selectedFloorType === 'all' 
+                      ? 'bg-slate-50 border-slate-300 shadow-sm ring-2 ring-slate-300' 
+                      : 'hover:bg-slate-100'
+                  }`}
+                >
+                  <div className="flex items-center gap-2 mb-1">
+                    <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 font-semibold">T</div>
+                    <h4 className="font-medium">Tüm Katlar</h4>
+                  </div>
+                  <p className="text-xs text-slate-600 ml-10">Dönem başlangıcı: <span className="font-medium">1 Şubat</span></p>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Hidden selection type - default to multiple */}
@@ -187,10 +399,15 @@ export function DateRangeFilter({ onFilter, onFilterChange }: DateRangeFilterPro
           </RadioGroup>
         </div>
         
+
+        
         {/* Display all 52 dönems as individual selectable items */}
-        <div className="w-full">
+        <div className="w-full border rounded-lg p-4">
           <div className="flex justify-between items-center mb-3">
-            <p className="text-base font-medium">Dönem Takvimi (52 hafta)</p>
+            <p className="text-base font-medium flex items-center gap-2">
+              <Calendar className="h-5 w-5 text-slate-600" />
+              Dönem Takvimi (52 hafta)
+            </p>
             <div className="flex gap-2">
               <Button
                 variant="outline"
@@ -201,7 +418,7 @@ export function DateRangeFilter({ onFilter, onFilterChange }: DateRangeFilterPro
                   const allDonems = Array.from({ length: 52 }, (_, i) => (i + 1).toString());
                   setSelectedDonems(allDonems);
                   setDonemType('multiple');
-                  onFilter(undefined, undefined, undefined, roomCount, roomType, undefined, allDonems, 'multiple');
+                  onFilter(undefined, undefined, undefined, roomCount, undefined, undefined, allDonems, 'multiple', selectedFloorType);
                 }}
               >
                 Hepsini Seç
@@ -262,29 +479,26 @@ export function DateRangeFilter({ onFilter, onFilterChange }: DateRangeFilterPro
                     {React.cloneElement(getSeasonAbbreviation(num).icon, { className: "h-4 w-4" })}
                     <span>{getSeasonAbbreviation(num).abbr}{getSeasonAbbreviation(num).seasonWeek}</span>
                   </div>
-                  <div className="text-xs mt-1 font-medium" title="Tarih Aralığı">{calculateDonemDates(num)}</div>
+                  <div className="text-xs mt-1 font-medium" title="Tarih Aralığı">{calculateDonemDates(num, selectedFloorType)}</div>
                 </div>
               );
             })}
           </div>
         </div>
         
-        {/* Room Count Filter */}
-        <div className="w-full">
-          <p className="text-base font-medium mb-2">Oda Sayısı</p>
+        {/* Apartment Type Filter */}
+        <div className="w-full mt-6">
+          <p className="text-base font-medium mb-2 flex items-center gap-2">
+            <Home className="h-5 w-5 text-slate-600" />
+            Daire Tipi
+          </p>
           <Select value={roomCount} onValueChange={setRoomCount}>
             <SelectTrigger className="w-full">
-              <SelectValue placeholder="Oda sayısı seçiniz" />
+              <SelectValue placeholder="Daire tipi seçiniz" />
             </SelectTrigger>
             <SelectContent>
               <SelectGroup>
-                <SelectLabel>Oda Sayısı</SelectLabel>
-                <SelectItem value="1+0">
-                  <div className="flex items-center">
-                    <Home className="mr-2 h-4 w-4 text-gray-500" />
-                    <span>1+0 (Stüdyo)</span>
-                  </div>
-                </SelectItem>
+                <SelectLabel>Daire Tipi</SelectLabel>
                 <SelectItem value="1+1">
                   <div className="flex items-center">
                     <Home className="mr-2 h-4 w-4 text-gray-500" />
@@ -303,61 +517,14 @@ export function DateRangeFilter({ onFilter, onFilterChange }: DateRangeFilterPro
                     <span>3+1</span>
                   </div>
                 </SelectItem>
-                <SelectItem value="4+1">
-                  <div className="flex items-center">
-                    <Home className="mr-2 h-4 w-4 text-gray-500" />
-                    <span>4+1</span>
-                  </div>
-                </SelectItem>
               </SelectGroup>
             </SelectContent>
           </Select>
         </div>
         
-        {/* Room Type Filter */}
-        <div className="w-full">
-          <p className="text-base font-medium mb-2">Oda Tipi</p>
-          <Select value={roomType} onValueChange={setRoomType}>
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Oda tipi seçiniz" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                <SelectLabel>Oda Tipleri</SelectLabel>
-                <SelectItem value="standart">
-                  <div className="flex items-center">
-                    <BedDouble className="mr-2 h-4 w-4 text-gray-500" />
-                    <span>Standart</span>
-                  </div>
-                </SelectItem>
-                <SelectItem value="premium">
-                  <div className="flex items-center">
-                    <BadgeCheck className="mr-2 h-4 w-4 text-blue-500" />
-                    <span>Premium</span>
-                  </div>
-                </SelectItem>
-                <SelectItem value="engelli">
-                  <div className="flex items-center">
-                    <span className="mr-2 h-4 w-4 flex items-center justify-center text-green-500">♿</span>
-                    <span>Engelli</span>
-                  </div>
-                </SelectItem>
-                <SelectItem value="king-suit">
-                  <div className="flex items-center">
-                    <span className="mr-2 h-4 w-4 flex items-center justify-center text-purple-500">👑</span>
-                    <span>King Suit</span>
-                  </div>
-                </SelectItem>
-                <SelectItem value="suit">
-                  <div className="flex items-center">
-                    <span className="mr-2 h-4 w-4 flex items-center justify-center text-amber-500">⭐</span>
-                    <span>Suit</span>
-                  </div>
-                </SelectItem>
-              </SelectGroup>
-            </SelectContent>
-          </Select>
-        </div>
+
+        
+
         
         <div className="flex justify-end gap-2 pt-2">
           <Button variant="ghost" onClick={handleClear} className="gap-1 text-sm font-medium">

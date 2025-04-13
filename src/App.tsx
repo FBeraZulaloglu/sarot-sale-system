@@ -13,6 +13,7 @@ import SalesRecords from "./pages/SalesRecords";
 import SalesRecordsUpdated from "./pages/SalesRecordsUpdated";
 import CancellableSales from "./pages/CancellableSales";
 import CancelSale from "./pages/CancelSale";
+import NewSaleRecord from "./pages/NewSaleRecord";
 import NotFound from "./pages/NotFound";
 import Projects from "./pages/Projects";
 import Customers from "./pages/Customers";
@@ -34,6 +35,7 @@ const App = () => (
             <Route path="/auth" element={<Authentication />} />
             <Route path="/projects" element={<Projects />} />
             <Route path="/projects/:projectId" element={<ProjectDetails />} />
+            <Route path="/projects/:projectId/new-sale" element={<NewSaleRecord />} />
             <Route path="/sales/new" element={<SaleForm />} />
             <Route path="/sales-records" element={<SalesRecords />} />
             <Route path="/sales-records-updated" element={<SalesRecordsUpdated />} />
